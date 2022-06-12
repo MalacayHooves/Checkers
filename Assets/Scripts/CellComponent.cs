@@ -26,6 +26,10 @@ namespace Checkers
             CallBackEvent(this, false);
         }
 
+       
+
+
+
         /// <summary>
         /// Конфигурирование связей клеток
         /// </summary>
@@ -35,8 +39,10 @@ namespace Checkers
             _neighbors = neighbors;
 		}
 
-	}
-
+        
+    }
+    
+    
     /// <summary>
     /// Тип соседа клетки
     /// </summary>

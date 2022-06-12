@@ -25,14 +25,19 @@ namespace Checkers
         private Vector3 _cameraWhiteRotation = new Vector3(50, 0, 0);
 
 
-
+        private void Awake()
+        {
+            _chip = GetComponent<ChipComponent>();
+            _cell = GetComponent<CellComponent>();
+            _baseClickComponent = GetComponent<BaseClickComponent>();
+        }
         // Start is called before the first frame update
         void Start()
         {
-            StartCoroutine(TurningSwitchRoutine(ColorType.Black));
+            StartCoroutine(TurningSwitchRoutine(ColorType.White));
 
         }
-
+        /*
         private void OnEnable()
         {
             _chip.OnClickEventHandler += (chip) => ChipClick();
@@ -55,7 +60,7 @@ namespace Checkers
             _cell.OnFocusEventHandler -= (cellComponent, isSelect) => ChipFocus();
             _baseClickComponent.OnFocusEventHandler -= (cellComponent, isSelect) => ChipFocus();
         }
-
+        */
         // Update is called once per frame
         void Update()
         {
@@ -120,16 +125,11 @@ namespace Checkers
             }
             //Из-за неточности времени между кадрами, без этой строчки вы не получите точное значение endPosition
             _camera.transform.position = endPosition;
-        }
-
-        private IEnumerator TurningAroundRoutine()
-        {
-            //turning camera around 180 deg
-            yield return null;
+            _camera.transform.eulerAngles = endRotation;
         }
 
 
-
+        
     }
 
 

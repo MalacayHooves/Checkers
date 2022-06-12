@@ -13,8 +13,9 @@ GameObject:
   - component: {fileID: 9097994171616371171}
   - component: {fileID: 4038563673930907012}
   - component: {fileID: 5283005991864007301}
+  - component: {fileID: -131552973719608733}
   m_Layer: 0
-  m_Name: BlackPiece
+  m_Name: BlackBoardPiece
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -253,3 +254,18 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!114 &-131552973719608733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2973572946531095820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add5a3772e30d8a40b9cc1bccbb015f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _pointerOnMaterial: {fileID: 2100000, guid: d6b1e3c692d3167498dd0a6d8a45eeff, type: 2}
+  _defaultMaterial: {fileID: 2100000, guid: e6ddcba99e2dbe642ad67f570e60d0bb, type: 2}
+  _color: 1

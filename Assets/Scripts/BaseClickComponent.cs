@@ -12,6 +12,9 @@ namespace Checkers
         //Список материалов на меше объекта
         private Material[] _meshMaterials = new Material[3];
 
+        [SerializeField]
+        Material _pointerOnMaterial, _defaultMaterial;
+
         [Tooltip("Цветовая сторона игрового объекта"), SerializeField]
         private ColorType _color;
 
@@ -26,6 +29,7 @@ namespace Checkers
         /// <remarks>У клеток пара - фишка, у фишек - клетка</remarks>
         public BaseClickComponent Pair { get; set; }
 
+        /*
         public BaseClickComponent GetPair(object component)
         {
             if (component.GetType() is CellComponent)
@@ -36,6 +40,7 @@ namespace Checkers
             CellComponent cell = default;
             return cell;
         }
+        */
 
 
         /// <summary>
@@ -96,8 +101,17 @@ namespace Checkers
         //события из дочернего класса в родительский
         protected void CallBackEvent(CellComponent target, bool isSelect)
         {
+            if (isSelect)
+                target.GetComponent<Renderer>().material = _pointerOnMaterial;
+            else
+                target.GetComponent<Renderer>().material = _defaultMaterial;
             OnFocusEventHandler?.Invoke(target, isSelect);
 		}
+
+        protected void LightningMethod(BaseClickComponent component, bool isSelect)
+        {
+
+        }
 
 		protected virtual void Start()
         {
