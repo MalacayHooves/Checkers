@@ -29,13 +29,17 @@ namespace Checkers
             _cell.OnFocusEventHandler += (cellComponent, isSelect) => ChipFocus();
             _baseClickComponent.OnFocusEventHandler += (cellComponent, isSelect) => ChipFocus();
             
+        }
 
+        private void OnDisable()
+        {
+            _chip.OnClickEventHandler -= (chip) => ChipClick();
+            _cell.OnClickEventHandler -= (cell) => CellClick();
+            _baseClickComponent.OnClickEventHandler -= (baseClickComponent) => CellClick();
 
-            //CellComponent p = _chip.GetPair(_chip);
-
-            //_chip.OnFocusEventHandler += (((_chip.GetPair(_chip) as CellComponent, true))) => ChipFocus();
-
-            //_baseClickComponent.OnClickEventHandler += ;
+            _chip.OnFocusEventHandler -= (cellComponent, isSelect) => ChipFocus();
+            _cell.OnFocusEventHandler -= (cellComponent, isSelect) => ChipFocus();
+            _baseClickComponent.OnFocusEventHandler -= (cellComponent, isSelect) => ChipFocus();
         }
 
         // Update is called once per frame
