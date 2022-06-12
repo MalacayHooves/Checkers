@@ -26,6 +26,16 @@ namespace Checkers
         /// <remarks>У клеток пара - фишка, у фишек - клетка</remarks>
         public BaseClickComponent Pair { get; set; }
 
+        public BaseClickComponent GetPair(object component)
+        {
+            if (component.GetType() is CellComponent)
+            {
+                ChipComponent chip = default;
+                return chip;
+            }
+            CellComponent cell = default;
+            return cell;
+        }
 
 
         /// <summary>
