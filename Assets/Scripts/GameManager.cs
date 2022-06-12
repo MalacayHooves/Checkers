@@ -7,15 +7,27 @@ namespace Checkers
 {
     public class GameManager : MonoBehaviour
     {
+        [SerializeField] Camera _camera;
+
         private BaseClickComponent _baseClickComponent;
         private ChipComponent _chip;
         private CellComponent _cell;
 
+        private bool isVictory = false;
+
+        private ColorType currentPlayer = ColorType.White;
+
         private PointerEventData _eventData;
+
+        private Vector3 _cameraStartPosition = new Vector3(3, 6, 9); // 50 180 0
+        private Vector3 _cameraEndPosition = new Vector3(4, 7, -2); // 50 0 0
+
+
 
         // Start is called before the first frame update
         void Start()
         {
+            StartCoroutine(TurningSwitchRoutine(ColorType.Black));
 
         }
 
@@ -63,8 +75,56 @@ namespace Checkers
         {
 
         }
+
+        private IEnumerator TurningSwitchRoutine(ColorType colorType)
+        {
+            while (!isVictory)
+            {
+                if (currentPlayer != colorType)
+                {
+                    colorType = currentPlayer;
+
+                    if (_camera.transform.position == _cameraEndPosition)
+                    {
+                        var pos = _cameraEndPosition;
+                        _cameraEndPosition = _cameraStartPosition;
+                        _cameraStartPosition = pos;
+                    }
+
+                    StartCoroutine (MoveFromTo(_camera.transform.position, _cameraEndPosition, 3f));
+                    //StartCoroutine (Turning)
+
+                }
+            }
+            yield return null;
+        }
+
+
+        private IEnumerator MoveFromTo(Vector3 startPosition, Vector3 endPosition, float time)
+        {
+            var currentTime = 0f;//текущее время смещения
+            while (currentTime < time)//асинхронный цикл, выполняется time секунд
+            {
+                //Lerp - в зависимости от времени (в относительных единицах, то есть от 0 до 1
+                //смещает объект от startPosition к endPosition
+                _camera.transform.position = Vector3.Lerp(startPosition, endPosition, 1 - (time - currentTime) / time);
+                currentTime += Time.deltaTime;//обновление времени, для смещения
+                yield return null;//ожидание следующего кадра
+            }
+            //Из-за неточности времени между кадрами, без этой строчки вы не получите точное значение endPosition
+            _camera.transform.position = endPosition;
+        }
+
+        private IEnumerator TurningAroundRoutine()
+        {
+            //turning camera around 180 deg
+            yield return null;
+        }
+
+
+
     }
 
-   
-   
+
+
 }
