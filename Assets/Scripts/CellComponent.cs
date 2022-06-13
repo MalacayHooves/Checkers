@@ -26,17 +26,39 @@ namespace Checkers
             CallBackEvent(this, false);
         }
 
+        private void OnEnable()
+        {
+            OnFocusEventHandler += (component, isSelected) => CallBackEvent(component, isSelected);
+            OnPointerEnterHandler += OnPointerEnter;
+            OnPointerExitHandler += OnPointerExit;
+        }
+
+        private void OnDisable()
+        {
+            OnFocusEventHandler -= (component, isSelected) => CallBackEvent(component, isSelected);
+            OnPointerEnterHandler -= OnPointerEnter;
+            OnPointerExitHandler -= OnPointerExit;
+        }
+
+
+
+
+
         /// <summary>
         /// Конфигурирование связей клеток
         /// </summary>
-		public void Configuration(Dictionary<NeighborType, CellComponent> neighbors)
-		{
-            if (_neighbors != null) return;
-            _neighbors = neighbors;
-		}
+        public void Configuration(Dictionary<NeighborType, CellComponent> neighbors)
+        {
+            {
+                if (_neighbors != null) return;
+                _neighbors = neighbors;
+            }
 
-	}
 
+        }
+    }
+    
+    
     /// <summary>
     /// Тип соседа клетки
     /// </summary>

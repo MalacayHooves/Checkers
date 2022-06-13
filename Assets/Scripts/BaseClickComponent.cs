@@ -12,6 +12,12 @@ namespace Checkers
         //Список материалов на меше объекта
         private Material[] _meshMaterials = new Material[3];
 
+        private
+            PointerEventData _pointerEventData;
+
+        [SerializeField]
+        Material _pointerOnMaterial, _defaultMaterial;
+
         [Tooltip("Цветовая сторона игрового объекта"), SerializeField]
         private ColorType _color;
 
@@ -26,6 +32,7 @@ namespace Checkers
         /// <remarks>У клеток пара - фишка, у фишек - клетка</remarks>
         public BaseClickComponent Pair { get; set; }
 
+        /*
         public BaseClickComponent GetPair(object component)
         {
             if (component.GetType() is CellComponent)
@@ -36,6 +43,7 @@ namespace Checkers
             CellComponent cell = default;
             return cell;
         }
+        */
 
 
         /// <summary>
@@ -65,6 +73,9 @@ namespace Checkers
             _meshMaterials[index] = null;
             _mesh.materials = _meshMaterials.Where(t => t != null).ToArray();
         }
+
+        public event PointerEnterHandler OnPointerEnterHandler;
+        public event PointerEnterHandler OnPointerExitHandler;
 
         /// <summary>
         /// Событие клика на игровом объекте
@@ -96,8 +107,21 @@ namespace Checkers
         //события из дочернего класса в родительский
         protected void CallBackEvent(CellComponent target, bool isSelect)
         {
+            OnPointerEnterHandler?.Invoke(_pointerEventData);
+
             OnFocusEventHandler?.Invoke(target, isSelect);
-		}
+            if (isSelect)
+            {
+                target.GetComponent<Renderer>().material = _pointerOnMaterial;
+                print("IsSelected");
+            }
+            else
+                target.GetComponent<Renderer>().material = _defaultMaterial;
+        }
+
+        protected void LightningMethod(BaseClickComponent component, bool isSelect)
+        {
+        }
 
 		protected virtual void Start()
         {
@@ -117,6 +141,7 @@ namespace Checkers
         Black
     }
 
+    public delegate void PointerEnterHandler(PointerEventData eventData);
     public delegate void ClickEventHandler(BaseClickComponent component);
     public delegate void FocusEventHandler(CellComponent component, bool isSelect);
 }
