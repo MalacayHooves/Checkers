@@ -16,7 +16,7 @@ namespace Checkers
             PointerEventData _pointerEventData;
 
         [SerializeField]
-        Material _pointerOnMaterial, _defaultMaterial;
+        protected Material _pointerOnMaterial, _defaultMaterial;
 
         [Tooltip("Цветовая сторона игрового объекта"), SerializeField]
         private ColorType _color;
@@ -107,9 +107,9 @@ namespace Checkers
         //события из дочернего класса в родительский
         protected void CallBackEvent(CellComponent target, bool isSelect)
         {
-            OnPointerEnterHandler?.Invoke(_pointerEventData);
+           // OnPointerEnterHandler?.Invoke(_pointerEventData);
 
-            OnFocusEventHandler?.Invoke(target, isSelect);
+           // OnFocusEventHandler?.Invoke(target, isSelect);
             if (isSelect)
             {
                 target.GetComponent<Renderer>().material = _pointerOnMaterial;

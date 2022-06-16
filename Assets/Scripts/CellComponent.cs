@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using UnityEngine;
 
 namespace Checkers
 {
     public class CellComponent : BaseClickComponent
     {
+
         private Dictionary<NeighborType, CellComponent> _neighbors;
 
 
@@ -20,6 +22,7 @@ namespace Checkers
         {
             CallBackEvent(this, true);
         }
+
 
         public override void OnPointerExit(PointerEventData eventData)
         {
