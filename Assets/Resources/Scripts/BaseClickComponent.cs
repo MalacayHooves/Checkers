@@ -12,11 +12,7 @@ namespace Checkers
         //Список материалов на меше объекта
         private Material[] _meshMaterials = new Material[3];
 
-        private
-            PointerEventData _pointerEventData;
-
-        [SerializeField]
-        protected Material _pointerOnMaterial, _defaultMaterial;
+        private PointerEventData _pointerEventData;
 
         [Tooltip("Цветовая сторона игрового объекта"), SerializeField]
         private ColorType _color;
