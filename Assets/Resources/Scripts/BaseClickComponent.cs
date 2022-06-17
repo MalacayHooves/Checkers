@@ -7,44 +7,51 @@ namespace Checkers
 {
     public abstract class BaseClickComponent : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
     {
+        protected GameManager _gameManager;
         //Меш игрового объекта
         private MeshRenderer _mesh;
         //Список материалов на меше объекта
-        private Material[] _meshMaterials = new Material[3];
-
-        private
-            PointerEventData _pointerEventData;
-
-        [SerializeField]
-        protected Material _pointerOnMaterial, _defaultMaterial;
+        [SerializeField] private Material[] _meshMaterials = new Material[3];
 
         [Tooltip("Цветовая сторона игрового объекта"), SerializeField]
         private ColorType _color;
+        protected bool isSelected = false;
 
         /// <summary>
         /// Возвращает цветовую сторону игрового объекта
         /// </summary>
         public ColorType GetColor => _color;
 
+        private HighlightCondition _highlight = 0;
+        public HighlightCondition Highlight
+        {
+            get { return _highlight; }
+            set { _highlight = value;
+                switch (Highlight)
+                {
+                    case HighlightCondition.NotHighlighted:
+                        gameObject.GetComponent<Renderer>().material = _meshMaterials[0];
+                        break;
+                    case HighlightCondition.Highlighted:
+                        gameObject.GetComponent<Renderer>().material = _meshMaterials[1];
+                        break;
+                    case HighlightCondition.CanMoveToCell:
+                        gameObject.GetComponent<Renderer>().material = _meshMaterials[2];
+                        break;
+                    case HighlightCondition.CanBeEatenChip:
+                        gameObject.GetComponent<Renderer>().material = _meshMaterials[2];
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
         /// <summary>
         /// Возвращает или устанавливает пару игровому объекту
         /// </summary>
         /// <remarks>У клеток пара - фишка, у фишек - клетка</remarks>
-        public BaseClickComponent Pair { get; set; }
-
-        /*
-        public BaseClickComponent GetPair(object component)
-        {
-            if (component.GetType() is CellComponent)
-            {
-                ChipComponent chip = default;
-                return chip;
-            }
-            CellComponent cell = default;
-            return cell;
-        }
-        */
-
+        protected BaseClickComponent _pair;
+        public BaseClickComponent Pair { get { return _pair; } set { _pair = value; } }
 
         /// <summary>
         /// Добавляет дополнительный материал
@@ -57,7 +64,7 @@ namespace Checkers
                 return;
             }
             _meshMaterials[index] = material;
-            _mesh.materials = _meshMaterials.Where(t => t != null).ToArray();
+            //_mesh.materials = _meshMaterials.Where(t => t != null).ToArray();
         }
 
         /// <summary>
@@ -73,9 +80,6 @@ namespace Checkers
             _meshMaterials[index] = null;
             _mesh.materials = _meshMaterials.Where(t => t != null).ToArray();
         }
-
-        public event PointerEnterHandler OnPointerEnterHandler;
-        public event PointerEnterHandler OnPointerExitHandler;
 
         /// <summary>
         /// Событие клика на игровом объекте
@@ -101,39 +105,47 @@ namespace Checkers
         public void OnPointerClick(PointerEventData eventData)
 		{
             OnClickEventHandler?.Invoke(this);
+            if (Highlight == HighlightCondition.Highlighted)
+            {
+                //Highlight = HighlightCondition.CanMoveToCell;
+                isSelected = true;
+            }
+            else if (!isSelected)
+            {
+                Highlight = HighlightCondition.NotHighlighted;
+                print("NotHigthlinghted");
+                //isSelected = false;
+            }
+
         }
 
         //Этот метод можно вызвать в дочерних классах (если они есть) и тем самым пробросить вызов
         //события из дочернего класса в родительский
-        protected void CallBackEvent(CellComponent target, bool isSelect)
+        protected void CallBackEvent(BaseClickComponent target, bool isFocus)
         {
-           // OnPointerEnterHandler?.Invoke(_pointerEventData);
-
-           // OnFocusEventHandler?.Invoke(target, isSelect);
-            if (isSelect)
-            {
-                target.GetComponent<Renderer>().material = _pointerOnMaterial;
-                print("IsSelected");
-            }
-            else
-                target.GetComponent<Renderer>().material = _defaultMaterial;
-        }
-
-        protected void LightningMethod(BaseClickComponent component, bool isSelect)
-        {
+            OnFocusEventHandler?.Invoke(target, isFocus);
         }
 
 		protected virtual void Start()
         {
+            _gameManager = FindObjectOfType<GameManager>();
             _mesh = GetComponent<MeshRenderer>();
             //Этот список будет использоваться для набора материалов у меша,
             //в данном ДЗ достаточно массива из 3 элементов
             //1 элемент - родной материал меша, он не меняется
             //2 элемент - материал при наведении курсора на клетку/выборе фишки
-            //3 элемент - материал клетки, на которую можно передвинуть фишку
+            //3 элемент - материал клетки, на которую можно передвинуть фишку или фишки которую можно съесть
             _meshMaterials[0] = _mesh.material;
         }
-	}
+
+        public enum HighlightCondition
+        {
+            NotHighlighted,
+            Highlighted,
+            CanMoveToCell,
+            CanBeEatenChip
+        }
+    }
 
     public enum ColorType
     {
@@ -141,7 +153,6 @@ namespace Checkers
         Black
     }
 
-    public delegate void PointerEnterHandler(PointerEventData eventData);
     public delegate void ClickEventHandler(BaseClickComponent component);
-    public delegate void FocusEventHandler(CellComponent component, bool isSelect);
+    public delegate void FocusEventHandler(BaseClickComponent component, bool isSelect);
 }
