@@ -38,7 +38,7 @@ namespace Checkers
         // Start is called before the first frame update
         void Start()
         {
-            StartCoroutine(TurningSwitchRoutine(ColorType.White));
+            StartCoroutine(TurningSwitchRoutine(currentPlayer));
 
         }
         /*

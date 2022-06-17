@@ -20,7 +20,7 @@ namespace Checkers
         public override void OnPointerEnter(PointerEventData eventData)
         {
             Highlight = HighlightCondition.Highlighted;
-            if (Pair != null) Pair.Highlight = HighlightCondition.Highlighted;
+            //if (Pair != null) Pair.Highlight = HighlightCondition.Highlighted;
             CallBackEvent(this, true);
         }
 
@@ -28,7 +28,7 @@ namespace Checkers
         public override void OnPointerExit(PointerEventData eventData)
         {
             Highlight = HighlightCondition.NotHighlighted;
-            if (Pair != null) Pair.Highlight = HighlightCondition.NotHighlighted;
+            //if (Pair != null) Pair.Highlight = HighlightCondition.NotHighlighted;
             CallBackEvent(this, false);
         }
 
