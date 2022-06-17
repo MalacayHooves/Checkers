@@ -29,10 +29,10 @@ namespace Checkers
             CallBackEvent(this, false);
         }
 
-        //private void OnEnable()
-        //{
-
-        //}
+        private void OnEnable()
+        {
+            AddAdditionalMaterial(Resources.Load<Material>("Materials/BlackCellMaterialHighlighted"));
+        }
 
         //private void OnDisable()
         //{

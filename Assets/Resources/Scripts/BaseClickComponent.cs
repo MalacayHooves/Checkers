@@ -12,8 +12,6 @@ namespace Checkers
         //Список материалов на меше объекта
         private Material[] _meshMaterials = new Material[3];
 
-        private PointerEventData _pointerEventData;
-
         [Tooltip("Цветовая сторона игрового объекта"), SerializeField]
         private ColorType _color;
 
@@ -103,11 +101,11 @@ namespace Checkers
             OnFocusEventHandler?.Invoke(target, isSelect);
             if (isSelect)
             {
-                target.GetComponent<Renderer>().material = _pointerOnMaterial;
+                target.GetComponent<Renderer>().material = _meshMaterials[1];
                 print("IsSelected");
             }
             else
-                target.GetComponent<Renderer>().material = _defaultMaterial;
+                target.GetComponent<Renderer>().material = _meshMaterials[0];
         }
 
         protected void LightningMethod(BaseClickComponent component, bool isSelect)
