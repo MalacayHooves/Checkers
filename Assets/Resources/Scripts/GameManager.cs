@@ -24,12 +24,16 @@ namespace Checkers
         private Vector3 _cameraWhitePosition = new Vector3(4, 7, -2);
         private Vector3 _cameraWhiteRotation = new Vector3(50, 0, 0);
 
+        private GameObject[,] _cells = new GameObject[8,8];
+        public GameObject[,] Cells { get { return _cells; } }
 
         private void Awake()
         {
-            _chip = GetComponent<ChipComponent>();
-            _cell = GetComponent<CellComponent>();
-            _baseClickComponent = GetComponent<BaseClickComponent>();
+            CellComponent[] cells = FindObjectsOfType<CellComponent>();
+            foreach (CellComponent cell in cells)
+            {
+                _cells[Mathf.RoundToInt(cell.gameObject.transform.position.x), Mathf.RoundToInt(cell.gameObject.transform.position.z)] = cell.gameObject;
+            }
         }
         // Start is called before the first frame update
         void Start()

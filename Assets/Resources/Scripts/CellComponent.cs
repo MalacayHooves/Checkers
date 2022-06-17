@@ -6,7 +6,6 @@ namespace Checkers
 {
     public class CellComponent : BaseClickComponent
     {
-
         private Dictionary<NeighborType, CellComponent> _neighbors;
 
 
@@ -20,18 +19,34 @@ namespace Checkers
 
         public override void OnPointerEnter(PointerEventData eventData)
         {
+            Highlight = HighlightCondition.Highlighted;
+            if (Pair != null) Pair.Highlight = HighlightCondition.Highlighted;
             CallBackEvent(this, true);
         }
 
 
         public override void OnPointerExit(PointerEventData eventData)
         {
+            Highlight = HighlightCondition.NotHighlighted;
+            if (Pair != null) Pair.Highlight = HighlightCondition.NotHighlighted;
             CallBackEvent(this, false);
         }
 
         private void OnEnable()
         {
-            AddAdditionalMaterial(Resources.Load<Material>("Materials/BlackCellMaterialHighlighted"));
+            switch (GetColor)
+            {
+                case ColorType.White:
+                    AddAdditionalMaterial(Resources.Load<Material>("Materials/WhiteCellMaterialHighlighted"), 1);
+                    break;
+                case ColorType.Black:
+                    AddAdditionalMaterial(Resources.Load<Material>("Materials/BlackCellMaterialHighlighted"), 1);
+                    break;
+                default:
+                    break;
+            }
+            
+            AddAdditionalMaterial(Resources.Load<Material>("Materials/CanMoveToCellMaterial"), 2);
         }
 
         //private void OnDisable()
