@@ -29,19 +29,15 @@ namespace Checkers
             CallBackEvent(this, false);
         }
 
-        private void OnEnable()
-        {
-            OnFocusEventHandler += (component, isSelected) => CallBackEvent(component, isSelected);
-            OnPointerEnterHandler += OnPointerEnter;
-            OnPointerExitHandler += OnPointerExit;
-        }
+        //private void OnEnable()
+        //{
 
-        private void OnDisable()
-        {
-            OnFocusEventHandler -= (component, isSelected) => CallBackEvent(component, isSelected);
-            OnPointerEnterHandler -= OnPointerEnter;
-            OnPointerExitHandler -= OnPointerExit;
-        }
+        //}
+
+        //private void OnDisable()
+        //{
+
+        //}
 
 
 

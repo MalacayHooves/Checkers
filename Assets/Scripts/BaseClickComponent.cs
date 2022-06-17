@@ -74,9 +74,6 @@ namespace Checkers
             _mesh.materials = _meshMaterials.Where(t => t != null).ToArray();
         }
 
-        public event PointerEnterHandler OnPointerEnterHandler;
-        public event PointerEnterHandler OnPointerExitHandler;
-
         /// <summary>
         /// Событие клика на игровом объекте
         /// </summary>
@@ -107,9 +104,7 @@ namespace Checkers
         //события из дочернего класса в родительский
         protected void CallBackEvent(CellComponent target, bool isSelect)
         {
-           // OnPointerEnterHandler?.Invoke(_pointerEventData);
-
-           // OnFocusEventHandler?.Invoke(target, isSelect);
+            OnFocusEventHandler?.Invoke(target, isSelect);
             if (isSelect)
             {
                 target.GetComponent<Renderer>().material = _pointerOnMaterial;
@@ -141,7 +136,6 @@ namespace Checkers
         Black
     }
 
-    public delegate void PointerEnterHandler(PointerEventData eventData);
     public delegate void ClickEventHandler(BaseClickComponent component);
     public delegate void FocusEventHandler(CellComponent component, bool isSelect);
 }
