@@ -15,7 +15,8 @@ namespace Checkers
 
         [Tooltip("Цветовая сторона игрового объекта"), SerializeField]
         private ColorType _color;
-        protected bool isSelected = false;
+        protected bool _isSelected = false;
+        public bool IsSelected => _isSelected;
 
         /// <summary>
         /// Возвращает цветовую сторону игрового объекта
@@ -108,9 +109,9 @@ namespace Checkers
             if (Highlight == HighlightCondition.Highlighted)
             {
                 //Highlight = HighlightCondition.CanMoveToCell;
-                isSelected = true;
+                _isSelected = true;
             }
-            else if (!isSelected)
+            else if (!_isSelected)
             {
                 Highlight = HighlightCondition.NotHighlighted;
                 print("NotHigthlinghted");

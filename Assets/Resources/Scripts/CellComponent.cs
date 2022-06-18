@@ -19,16 +19,16 @@ namespace Checkers
 
         public override void OnPointerEnter(PointerEventData eventData)
         {
+            if (Pair != null && Pair.IsSelected) return;
             Highlight = HighlightCondition.Highlighted;
-            //if (Pair != null) Pair.Highlight = HighlightCondition.Highlighted;
             CallBackEvent(this, true);
         }
 
 
         public override void OnPointerExit(PointerEventData eventData)
         {
+            if (Pair != null && Pair.IsSelected) return;
             Highlight = HighlightCondition.NotHighlighted;
-            //if (Pair != null) Pair.Highlight = HighlightCondition.NotHighlighted;
             CallBackEvent(this, false);
         }
 

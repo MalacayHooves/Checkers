@@ -8,6 +8,7 @@ namespace Checkers
     {
         public override void OnPointerEnter(PointerEventData eventData)
         {
+            if (_isSelected) return;
             GetPair();
             Highlight = HighlightCondition.Highlighted;
             if (Pair != null) Pair.Highlight = HighlightCondition.Highlighted;
@@ -15,10 +16,9 @@ namespace Checkers
 
         public override void OnPointerExit(PointerEventData eventData)
         {
-            if (!isSelected)
-                Highlight = HighlightCondition.NotHighlighted;
+            if (_isSelected) return;
+            Highlight = HighlightCondition.NotHighlighted;
             if (Pair != null) Pair.Highlight = HighlightCondition.NotHighlighted;
-            isSelected = false;
         }
 
         private void OnEnable()
