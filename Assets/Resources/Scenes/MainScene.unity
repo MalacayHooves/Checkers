@@ -3092,6 +3092,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Chip5
       objectReference: {fileID: 0}
+    - target: {fileID: 8418436455575554556, guid: 1cdbe59bdc082bc4eae53c2b9b099da8,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1cdbe59bdc082bc4eae53c2b9b099da8, type: 3}
 --- !u!4 &239489693 stripped
@@ -8336,6 +8341,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _camera: {fileID: 963194227}
+  _chip: {fileID: 0}
 --- !u!4 &810148323
 Transform:
   m_ObjectHideFlags: 0
@@ -15391,6 +15397,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Chip6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8418436455575554556, guid: 1cdbe59bdc082bc4eae53c2b9b099da8,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1cdbe59bdc082bc4eae53c2b9b099da8, type: 3}

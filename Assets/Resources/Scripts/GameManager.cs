@@ -67,7 +67,7 @@ namespace Checkers
             {
                 if (component.name == _destinations.destinationOne.name || component.name == _destinations.destinationTwo.name)
                 {
-                    MoveChip((CellComponent)component);
+                    StartCoroutine(_chip.MoveChip((CellComponent)component));
                 }
             }
         }
@@ -116,11 +116,6 @@ namespace Checkers
                 _destinations.destinationTwo.Highlight = highlight;
                 _destinations.destinationTwo.IsSelected = isSelected;
             }
-        }
-
-        private void MoveChip(CellComponent endPosition)
-        {
-
         }
 
         private IEnumerator TurningSwitchRoutine(ColorType colorType)

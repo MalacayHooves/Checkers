@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -49,6 +50,36 @@ namespace Checkers
         {
             Pair = _gameManager.Cells[Mathf.RoundToInt(gameObject.transform.position.x), Mathf.RoundToInt(gameObject.transform.position.z)].GetComponent<BaseClickComponent>();
             Pair.Pair = this;
+        }
+
+        public IEnumerator MoveChip(CellComponent end)
+        {
+            Vector3 startPosition = transform.position;
+            Vector3 endPosition = end.transform.position;
+            Vector3 position;
+            float currentTime = 0f;
+            float time = 2f;
+            while (currentTime <= 0.5 * time)
+            {
+                position.x = Mathf.Lerp(startPosition.x, endPosition.x, 1 - (time - currentTime) / time);
+                position.y = Mathf.Lerp(startPosition.y, endPosition.y + 1, 1 - (time - currentTime) / time);
+                position.z = Mathf.Lerp(startPosition.z, endPosition.z, 1 - (time - currentTime) / time);
+                transform.position = position;
+                currentTime += Time.deltaTime;
+                yield return null;
+            }
+            yield return new WaitForSeconds(time/10);
+            while (currentTime > 0.5 * time && currentTime <= time)
+            {
+                position.x = Mathf.Lerp(startPosition.x, endPosition.x, 1 - (time - currentTime) / time);
+                position.y = Mathf.Lerp(startPosition.y + 1, endPosition.y, 1 - (time - currentTime) / time);
+                position.z = Mathf.Lerp(startPosition.z, endPosition.z, 1 - (time - currentTime) / time);
+                transform.position = position;
+                currentTime += Time.deltaTime;
+                yield return null;
+            }
+
+            transform.position = end.transform.position;
         }
     }
 }
