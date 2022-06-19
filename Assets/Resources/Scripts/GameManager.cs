@@ -9,15 +9,11 @@ namespace Checkers
     {
         [SerializeField] Camera _camera;
 
-        private BaseClickComponent _baseClickComponent;
-        private ChipComponent _chip;
-        private CellComponent _cell;
+        [SerializeField] private ChipComponent _chip;
 
         private bool isVictory = false;
 
         private ColorType currentPlayer = ColorType.White;
-
-        private PointerEventData _eventData;
 
         private Vector3 _cameraBlackPosition = new Vector3(3, 6, 9);
         private Vector3 _cameraBlackRotation = new Vector3(50, 180, 0);
@@ -41,50 +37,32 @@ namespace Checkers
             StartCoroutine(TurningSwitchRoutine(currentPlayer));
 
         }
-        /*
+        
         private void OnEnable()
         {
-            _chip.OnClickEventHandler += (chip) => ChipClick();
-            _cell.OnClickEventHandler += (cell) => CellClick();
-            _baseClickComponent.OnClickEventHandler += (baseClickComponent) => CellClick();
-
-            _chip.OnFocusEventHandler += (cellComponent, isSelect) => ChipFocus();
-            _cell.OnFocusEventHandler += (cellComponent, isSelect) => ChipFocus();
-            _baseClickComponent.OnFocusEventHandler += (cellComponent, isSelect) => ChipFocus();
-            
+            BaseClickComponent.OnClickEventHandler += OnClick;
         }
 
         private void OnDisable()
         {
-            _chip.OnClickEventHandler -= (chip) => ChipClick();
-            _cell.OnClickEventHandler -= (cell) => CellClick();
-            _baseClickComponent.OnClickEventHandler -= (baseClickComponent) => CellClick();
-
-            _chip.OnFocusEventHandler -= (cellComponent, isSelect) => ChipFocus();
-            _cell.OnFocusEventHandler -= (cellComponent, isSelect) => ChipFocus();
-            _baseClickComponent.OnFocusEventHandler -= (cellComponent, isSelect) => ChipFocus();
-        }
-        */
-        // Update is called once per frame
-        void Update()
-        {
-
+            BaseClickComponent.OnClickEventHandler -= OnClick;
         }
 
-
-        private void ChipClick()
+        private void OnClick(BaseClickComponent component)
         {
-
-        }
-
-        private void CellClick()
-        {
-
-        }
-
-        private void ChipFocus()
-        {
-
+            var type = component.GetType();
+            if (type == typeof(ChipComponent))
+            {
+                if (_chip != null)
+                {
+                    _chip.DeselectChip();
+                }
+                _chip = (ChipComponent)component;
+            }
+            else if (type == typeof(CellComponent))
+            {
+                print("SSS");
+            }
         }
 
         private IEnumerator TurningSwitchRoutine(ColorType colorType)
@@ -131,9 +109,6 @@ namespace Checkers
             _camera.transform.position = endPosition;
             _camera.transform.eulerAngles = endRotation;
         }
-
-
-        
     }
 
 

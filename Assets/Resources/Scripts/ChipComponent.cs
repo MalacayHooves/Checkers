@@ -38,6 +38,13 @@ namespace Checkers
             AddAdditionalMaterial(Resources.Load<Material>("Materials/CanBeEatenMaterial"), 2);
         }
 
+        public void DeselectChip()
+        {
+            _isSelected = false;
+            Highlight = HighlightCondition.NotHighlighted;
+            if (Pair != null) Pair.Highlight = HighlightCondition.NotHighlighted;
+        }
+
         private void GetPair()
         {
             Pair = _gameManager.Cells[Mathf.RoundToInt(gameObject.transform.position.x), Mathf.RoundToInt(gameObject.transform.position.z)].GetComponent<BaseClickComponent>();

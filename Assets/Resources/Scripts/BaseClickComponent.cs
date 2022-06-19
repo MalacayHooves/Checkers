@@ -85,7 +85,7 @@ namespace Checkers
         /// <summary>
         /// Событие клика на игровом объекте
         /// </summary>
-        public event ClickEventHandler OnClickEventHandler;
+        public static event ClickEventHandler OnClickEventHandler;
 
         /// <summary>
         /// Событие наведения и сброса наведения на объект
