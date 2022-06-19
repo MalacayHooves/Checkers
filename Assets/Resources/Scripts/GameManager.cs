@@ -57,25 +57,18 @@ namespace Checkers
                 if (_chip != null)
                 {
                     _chip.DeselectChip();
+                    ChooseCellSelection(BaseClickComponent.HighlightCondition.NotHighlighted, false);
                 }
                 _chip = (ChipComponent)component;
                 _destinations = GetDestinations(_chip.Pair);
-                if (_destinations.destinationOne != null)
-                {
-                    _destinations.destinationOne.Highlight = BaseClickComponent.HighlightCondition.CanMoveToCell;
-                    _destinations.destinationOne.IsSelected = true;
-                }
-
-                if (_destinations.destinationTwo != null)
-                {
-                    _destinations.destinationTwo.Highlight = BaseClickComponent.HighlightCondition.CanMoveToCell;
-                    _destinations.destinationTwo.IsSelected = true;
-                }
-
+                ChooseCellSelection(BaseClickComponent.HighlightCondition.CanMoveToCell, true);
             }
             else if (type == typeof(CellComponent))
             {
-                print($"{component.name} is clicked");
+                if (component.name == _destinations.destinationOne.name || component.name == _destinations.destinationTwo.name)
+                {
+                    MoveChip((CellComponent)component);
+                }
             }
         }
 
@@ -108,6 +101,26 @@ namespace Checkers
         private CellComponent GetDestination(int x, int z)
         {
             return _cells[x, z];
+        }
+
+        private void ChooseCellSelection(BaseClickComponent.HighlightCondition highlight, bool isSelected)
+        {
+            if (_destinations.destinationOne != null)
+            {
+                _destinations.destinationOne.Highlight = highlight;
+                _destinations.destinationOne.IsSelected = isSelected;
+            }
+
+            if (_destinations.destinationTwo != null)
+            {
+                _destinations.destinationTwo.Highlight = highlight;
+                _destinations.destinationTwo.IsSelected = isSelected;
+            }
+        }
+
+        private void MoveChip(CellComponent endPosition)
+        {
+
         }
 
         private IEnumerator TurningSwitchRoutine(ColorType colorType)

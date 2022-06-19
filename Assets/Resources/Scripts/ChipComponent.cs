@@ -11,14 +11,14 @@ namespace Checkers
             if (_isSelected) return;
             GetPair();
             Highlight = HighlightCondition.Highlighted;
-            if (Pair != null) Pair.Highlight = HighlightCondition.Highlighted;
+            if (Pair != null && !Pair.IsSelected) Pair.Highlight = HighlightCondition.Highlighted;
         }
 
         public override void OnPointerExit(PointerEventData eventData)
         {
             if (_isSelected) return;
             Highlight = HighlightCondition.NotHighlighted;
-            if (Pair != null) Pair.Highlight = HighlightCondition.NotHighlighted;
+            if (Pair != null && !Pair.IsSelected) Pair.Highlight = HighlightCondition.NotHighlighted;
         }
 
         private void OnEnable()
