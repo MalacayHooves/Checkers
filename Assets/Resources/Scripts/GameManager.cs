@@ -10,6 +10,7 @@ namespace Checkers
         [SerializeField] Camera _camera;
 
         [SerializeField] private ChipComponent _chip;
+        [SerializeField] private (CellComponent destinationOne, CellComponent destinationTwo) _destinations;
 
         private bool isVictory = false;
 
@@ -20,15 +21,15 @@ namespace Checkers
         private Vector3 _cameraWhitePosition = new Vector3(4, 7, -2);
         private Vector3 _cameraWhiteRotation = new Vector3(50, 0, 0);
 
-        private GameObject[,] _cells = new GameObject[8,8];
-        public GameObject[,] Cells { get { return _cells; } }
+        private CellComponent[,] _cells = new CellComponent[8,8];
+        public CellComponent[,] Cells { get { return _cells; } }
 
         private void Awake()
         {
             CellComponent[] cells = FindObjectsOfType<CellComponent>();
             foreach (CellComponent cell in cells)
             {
-                _cells[Mathf.RoundToInt(cell.gameObject.transform.position.x), Mathf.RoundToInt(cell.gameObject.transform.position.z)] = cell.gameObject;
+                _cells[Mathf.RoundToInt(cell.gameObject.transform.position.x), Mathf.RoundToInt(cell.gameObject.transform.position.z)] = cell;
             }
         }
         // Start is called before the first frame update
@@ -58,11 +59,55 @@ namespace Checkers
                     _chip.DeselectChip();
                 }
                 _chip = (ChipComponent)component;
+                _destinations = GetDestinations(_chip.Pair);
+                if (_destinations.destinationOne != null)
+                {
+                    _destinations.destinationOne.Highlight = BaseClickComponent.HighlightCondition.CanMoveToCell;
+                    _destinations.destinationOne.IsSelected = true;
+                }
+
+                if (_destinations.destinationTwo != null)
+                {
+                    _destinations.destinationTwo.Highlight = BaseClickComponent.HighlightCondition.CanMoveToCell;
+                    _destinations.destinationTwo.IsSelected = true;
+                }
+
             }
             else if (type == typeof(CellComponent))
             {
-                print("SSS");
+                print($"{component.name} is clicked");
             }
+        }
+
+        private (CellComponent destinationOne, CellComponent destinationTwo) GetDestinations(BaseClickComponent cell)
+        {
+            int cellIndexX = 0, cellIndexZ = 0;
+            CellComponent destinationOne = null, destinationTwo = null;
+            for (int x = 0; x < _cells.GetLength(0); x++)
+            {
+                for (int z = 0; z < _cells.GetLength(1); z++)
+                {
+                    if (_cells[x, z].name == cell.name)
+                    {
+                        cellIndexX = x;
+                        cellIndexZ = z;
+                    }
+                }
+            }
+            if (cellIndexX > 0 && cellIndexZ >= 0 && cellIndexX - 1 < _cells.GetLength(0) && cellIndexZ + 1 < _cells.GetLength(1))
+            {
+                destinationOne = GetDestination(cellIndexX - 1, cellIndexZ + 1);
+            }
+            if (cellIndexX >= 0 && cellIndexZ >= 0 && cellIndexX + 1 < _cells.GetLength(0) && cellIndexZ + 1 < _cells.GetLength(1))
+            {
+                destinationTwo = GetDestination(cellIndexX + 1, cellIndexZ + 1);
+            }
+            return (destinationOne, destinationTwo);
+        }
+
+        private CellComponent GetDestination(int x, int z)
+        {
+            return _cells[x, z];
         }
 
         private IEnumerator TurningSwitchRoutine(ColorType colorType)

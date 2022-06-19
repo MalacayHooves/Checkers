@@ -16,7 +16,11 @@ namespace Checkers
         [Tooltip("Цветовая сторона игрового объекта"), SerializeField]
         private ColorType _color;
         protected bool _isSelected = false;
-        public bool IsSelected => _isSelected;
+        public bool IsSelected
+        {
+            set { _isSelected = value; }
+            get { return _isSelected; }
+        }
 
         /// <summary>
         /// Возвращает цветовую сторону игрового объекта
