@@ -7,6 +7,8 @@ namespace Checkers
 {
     public class ChipComponent : BaseClickComponent
     {
+        protected Player _player;
+
         public override void OnPointerEnter(PointerEventData eventData)
         {
             if (_isSelected) return;
@@ -29,10 +31,12 @@ namespace Checkers
                 case ColorType.White:
                     AddAdditionalMaterial(Resources.Load<Material>("Materials/WhiteChipMaterial"), 0);
                     AddAdditionalMaterial(Resources.Load<Material>("Materials/WhiteChipMaterialHighlighted"), 1);
+                    _player = FindObjectOfType<PlayerWhite>();
                     break;
                 case ColorType.Black:
                     AddAdditionalMaterial(Resources.Load<Material>("Materials/BlackChipMaterial"), 0);
                     AddAdditionalMaterial(Resources.Load<Material>("Materials/BlackChipMaterialHighlighted"), 1);
+                    _player = FindObjectOfType<PlayerBlack>();
                     break;
                 default:
                     break;
@@ -52,7 +56,7 @@ namespace Checkers
 
         private void GetPair()
         {
-            Pair = _gameManager.Cells[Mathf.RoundToInt(gameObject.transform.position.x), Mathf.RoundToInt(gameObject.transform.position.z)].GetComponent<BaseClickComponent>();
+            Pair = _player.Cells[Mathf.RoundToInt(gameObject.transform.localPosition.x), Mathf.RoundToInt(gameObject.transform.localPosition.z)].GetComponent<BaseClickComponent>();
             Pair.Pair = this;
         }
 

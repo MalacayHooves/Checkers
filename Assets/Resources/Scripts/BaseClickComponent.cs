@@ -8,14 +8,12 @@ namespace Checkers
 {
     public abstract class BaseClickComponent : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
     {
-        protected GameManager _gameManager;
         //Меш игрового объекта
         private MeshRenderer _mesh;
         //Список материалов на меше объекта
         [SerializeField] private Material[] _meshMaterials = new Material[3];
 
-        [Tooltip("Цветовая сторона игрового объекта"), SerializeField]
-        private ColorType _color;
+
         protected bool _isSelected = false;
         public bool IsSelected
         {
@@ -23,6 +21,8 @@ namespace Checkers
             get { return _isSelected; }
         }
 
+        [Tooltip("Цветовая сторона игрового объекта"), SerializeField]
+        private ColorType _color = ColorType.White;
         /// <summary>
         /// Возвращает цветовую сторону игрового объекта
         /// </summary>
@@ -95,7 +95,7 @@ namespace Checkers
         /// <summary>
         /// Событие наведения и сброса наведения на объект
         /// </summary>
-        public event FocusEventHandler OnFocusEventHandler;
+        //public event FocusEventHandler OnFocusEventHandler;
 
 
         //При навадении на объект мышки, вызывается данный метод
@@ -122,7 +122,6 @@ namespace Checkers
 
 		protected virtual void Start()
         {
-            _gameManager = FindObjectOfType<GameManager>();
             _mesh = GetComponent<MeshRenderer>();
             //Этот список будет использоваться для набора материалов у меша,
             //в данном ДЗ достаточно массива из 3 элементов
@@ -154,5 +153,5 @@ namespace Checkers
     }
 
     public delegate void ClickEventHandler(BaseClickComponent component);
-    public delegate void FocusEventHandler(BaseClickComponent component, bool isSelect);
+    //public delegate void FocusEventHandler(BaseClickComponent component, bool isSelect);
 }

@@ -5,48 +5,62 @@ using UnityEngine.EventSystems;
 
 namespace Checkers
 {
-    public class GameManager : MonoBehaviour
+    public abstract class Player : MonoBehaviour
     {
-        [SerializeField] Camera _camera;
+        [SerializeField] protected Camera _camera;
+        [SerializeField] protected Player _oppositePlayer;
 
-        [SerializeField] private ChipComponent _chip;
-        [SerializeField] private CellComponent _destinationOne;
-        [SerializeField] private CellComponent _destinationTwo;
-        [SerializeField] private ChipComponent _targetOne;
-        [SerializeField] private ChipComponent _targetTwo;
+        [SerializeField] protected ChipComponent _chip;
+        [SerializeField] protected CellComponent _destinationOne;
+        [SerializeField] protected CellComponent _destinationTwo;
+        [SerializeField] protected ChipComponent _targetOne;
+        [SerializeField] protected ChipComponent _targetTwo;
 
-        private bool isVictory = false;
+        [SerializeField] protected Transform _cameraPosition1;
+        [SerializeField] protected Transform _cameraPosition2;
+        [SerializeField] protected Transform _cameraPosition3;
 
-        [SerializeField] private ColorType _currentPlayer = ColorType.White;
+        protected bool isVictory = false;
 
-        private Vector3 _cameraBlackPosition = new Vector3(3, 6, 9);
-        private Vector3 _cameraBlackRotation = new Vector3(50, 180, 0);
-        private Vector3 _cameraWhitePosition = new Vector3(4, 7, -2);
-        private Vector3 _cameraWhiteRotation = new Vector3(50, 0, 0);
+        [SerializeField] protected ColorType _currentPlayer;
+        [Tooltip("Время движения фишки"), SerializeField] protected float _chipMoveTime = 1f;
+        [Tooltip("Время движения камеры"), SerializeField] protected float _cameraMoveTime = 5f;
 
-        private CellComponent[,] _cells = new CellComponent[8,8];
+        protected CellComponent[,] _cells = new CellComponent[8,8];
         public CellComponent[,] Cells { get { return _cells; } }
 
-        private void Start()
+        protected void Awake()
         {
-            CellComponent[] cells = FindObjectsOfType<CellComponent>();
-            foreach (CellComponent cell in cells)
-            {
-                _cells[Mathf.RoundToInt(cell.gameObject.transform.position.x), Mathf.RoundToInt(cell.gameObject.transform.position.z)] = cell;
-            }
-        }
-        
-        private void OnEnable()
-        {
-            BaseClickComponent.OnClickEventHandler += OnClick;
+            _camera = Camera.main;
+            SetPlayerColor();
+            SetCellsArray();
+            SetOppositePlayer();
+            _cameraPosition1 = transform.Find("CameraPosition1");
+            _cameraPosition2 = transform.Find("CameraPosition2");
+            _cameraPosition3 = transform.Find("CameraPosition3");
         }
 
-        private void OnDisable()
+        protected abstract void SetPlayerColor();
+
+        protected abstract void SetCellsArray();
+
+        protected abstract void SetOppositePlayer();
+        
+        protected void OnEnable()
+        {
+            BaseClickComponent.OnClickEventHandler += OnClick;
+            if (Vector3.Distance(_camera.transform.position, _cameraPosition3.position) > 1f)
+            {
+                StartCoroutine(MoveCamera());
+            }
+        }
+
+        protected void OnDisable()
         {
             BaseClickComponent.OnClickEventHandler -= OnClick;
         }
 
-        private void OnClick(BaseClickComponent component)
+        protected void OnClick(BaseClickComponent component)
         {
             var type = component.GetType();
             if (type == typeof(ChipComponent) && component.GetColor == _currentPlayer)
@@ -66,14 +80,14 @@ namespace Checkers
                 {
                     _chip.DeselectChip();
                     SetCellsAndChipsHighlight(BaseClickComponent.HighlightCondition.NotHighlighted, BaseClickComponent.HighlightCondition.CanBeEatenChip, false);
-                    StartCoroutine(_chip.MoveChip((CellComponent)component, 2f));
+                    StartCoroutine(_chip.MoveChip((CellComponent)component, _chipMoveTime));
                     if (_destinationOne != null && component.name == _destinationOne.name)
                     {
-                        if (_targetOne != null) StartCoroutine(DisableChip(_targetOne.gameObject, 1f));
+                        if (_targetOne != null) StartCoroutine(DisableChip(_targetOne.gameObject, 0.5f * _chipMoveTime));
                     }
                     else if (_destinationTwo != null && component.name == _destinationTwo.name)
                     {
-                        if (_targetTwo != null) StartCoroutine(DisableChip(_targetTwo.gameObject, 1f));
+                        if (_targetTwo != null) StartCoroutine(DisableChip(_targetTwo.gameObject, 0.5f * _chipMoveTime));
                     }
 
                     _chip = null;
@@ -81,11 +95,12 @@ namespace Checkers
                     _destinationTwo = null;
                     _targetOne = null;
                     _targetTwo = null;
+                    StartCoroutine(SwitchTurn(_chipMoveTime));
                 }
             }
         }
 
-        private void GetDestinationsAndTargets(ChipComponent chip, BaseClickComponent cell)
+        protected void GetDestinationsAndTargets(ChipComponent chip, BaseClickComponent cell)
         {
             int cellIndexX = 0, cellIndexZ = 0;
             CellComponent destinationOne = null, destinationTwo = null;
@@ -101,9 +116,11 @@ namespace Checkers
                     }
                 }
             }
+
             if (cellIndexX > 0 && cellIndexZ >= 0 && cellIndexX - 1 < _cells.GetLength(0) && cellIndexZ + 1 < _cells.GetLength(1))
             {
                 destinationOne = GetDestination(cellIndexX - 1, cellIndexZ + 1);
+
                 if (destinationOne.Pair != null)
                 {
                     targetOne = (ChipComponent)destinationOne.Pair;
@@ -125,6 +142,7 @@ namespace Checkers
             if (cellIndexX >= 0 && cellIndexZ >= 0 && cellIndexX + 1 < _cells.GetLength(0) && cellIndexZ + 1 < _cells.GetLength(1))
             {
                 destinationTwo = GetDestination(cellIndexX + 1, cellIndexZ + 1);
+                print(destinationTwo.name);
                 if (destinationTwo.Pair != null)
                 {
                     targetTwo = (ChipComponent)destinationTwo.Pair;
@@ -149,12 +167,12 @@ namespace Checkers
             _targetTwo = targetTwo;
         }
 
-        private CellComponent GetDestination(int x, int z)
+        protected CellComponent GetDestination(int x, int z)
         {
             return _cells[x, z];
         }
 
-        private void SetCellsAndChipsHighlight(BaseClickComponent.HighlightCondition cellsHighlight, BaseClickComponent.HighlightCondition chipsHighlight , bool isSelected)
+        protected void SetCellsAndChipsHighlight(BaseClickComponent.HighlightCondition cellsHighlight, BaseClickComponent.HighlightCondition chipsHighlight , bool isSelected)
         {
             if (_destinationOne != null)
             {
@@ -181,55 +199,43 @@ namespace Checkers
             }
         }
 
-        private IEnumerator DisableChip(GameObject chip, float time)
+        protected IEnumerator DisableChip(GameObject chip, float time)
         {
             yield return new WaitForSeconds(time);
             chip.SetActive(false);
         }
 
-        private IEnumerator TurningSwitchRoutine(ColorType colorType)
+        protected IEnumerator SwitchTurn(float time)
         {
-            while (!isVictory)
-            {
-                if (colorType == ColorType.White)
-                    yield return MoveFromTo(_camera.transform.position, _cameraWhitePosition, _camera.transform.eulerAngles, _cameraWhiteRotation, 3f);
-                else if (colorType == ColorType.Black)
-                    yield return MoveFromTo(_camera.transform.position, _cameraBlackPosition, _camera.transform.eulerAngles, _cameraBlackRotation, 3f);
-               
-                
-                /*
-                    colorType = currentPlayer;
+            yield return new WaitForSeconds(time);
+            _oppositePlayer.enabled = true;
+            this.enabled = false;
+        }
 
-                    if (_camera.transform.position == _cameraWhitePosition)
-                    {
-                        var pos = _cameraWhitePosition;
-                        _cameraWhitePosition = _cameraBlackPosition;
-                        _cameraBlackPosition = pos;
-                    }
-
-                    yield return MoveFromTo(_camera.transform.position, _cameraWhitePosition, 3f);
-                    //StartCoroutine (Turning)*/
-
-            }
-            //yield return null;
+        protected IEnumerator MoveCamera()
+        {
+            yield return MoveFromTo(_camera.transform.position, _cameraPosition1.position,
+                _camera.transform.rotation, _cameraPosition1.transform.rotation, _cameraMoveTime / 4);
+            yield return MoveFromTo(_cameraPosition1.position, _cameraPosition2.position,
+                _cameraPosition1.rotation, _cameraPosition2.transform.rotation, _cameraMoveTime / 2);
+            yield return MoveFromTo(_cameraPosition2.position, _cameraPosition3.position,
+                _cameraPosition2.rotation, _cameraPosition3.rotation, _cameraMoveTime / 4);
         }
 
 
-        private IEnumerator MoveFromTo(Vector3 startPosition, Vector3 endPosition, Vector3 startRotation, Vector3 endRotation, float time)
+        protected IEnumerator MoveFromTo(Vector3 startPosition, Vector3 endPosition, Quaternion startRotation, Quaternion endRotation, float time)
         {
-            var currentTime = 0f;//текущее время смещения
-            while (currentTime < time)//асинхронный цикл, выполняется time секунд
+            var currentTime = 0f;
+            while (currentTime < time)
             {
-                //Lerp - в зависимости от времени (в относительных единицах, то есть от 0 до 1
-                //смещает объект от startPosition к endPosition
                 _camera.transform.position = Vector3.Lerp(startPosition, endPosition, 1 - (time - currentTime) / time);
-                _camera.transform.eulerAngles = Vector3.Lerp(startRotation, endRotation, 1 - (time - currentTime) / time);
-                currentTime += Time.deltaTime;//обновление времени, для смещения
-                yield return null;//ожидание следующего кадра
+                _camera.transform.rotation = Quaternion.Slerp(startRotation, endRotation, 1 - (time - currentTime) / time);
+                currentTime += Time.deltaTime;
+                yield return null;
             }
-            //Из-за неточности времени между кадрами, без этой строчки вы не получите точное значение endPosition
+
             _camera.transform.position = endPosition;
-            _camera.transform.eulerAngles = endRotation;
+            _camera.transform.rotation = endRotation;
         }
     }
 
