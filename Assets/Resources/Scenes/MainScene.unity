@@ -13206,7 +13206,7 @@ MonoBehaviour:
   _cameraPosition3: {fileID: 0}
   _currentPlayer: 0
   _chipMoveTime: 1
-  _cameraMoveTime: 5
+  _cameraMoveTime: 2
 --- !u!1001 &1130810102
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13462,7 +13462,7 @@ MonoBehaviour:
   _cameraPosition3: {fileID: 0}
   _currentPlayer: 0
   _chipMoveTime: 1
-  _cameraMoveTime: 5
+  _cameraMoveTime: 2
 --- !u!1001 &1165287341
 PrefabInstance:
   m_ObjectHideFlags: 0

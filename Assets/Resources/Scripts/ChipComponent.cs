@@ -60,7 +60,7 @@ namespace Checkers
             Pair.Pair = this;
         }
 
-        private void Unpair()
+        public void Unpair()
         {
             Pair.Pair = null;
         }

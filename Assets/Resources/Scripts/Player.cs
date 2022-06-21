@@ -20,11 +20,26 @@ namespace Checkers
         [SerializeField] protected Transform _cameraPosition2;
         [SerializeField] protected Transform _cameraPosition3;
 
-        protected bool isVictory = false;
+
 
         [SerializeField] protected ColorType _currentPlayer;
         [Tooltip("Время движения фишки"), SerializeField] protected float _chipMoveTime = 1f;
         [Tooltip("Время движения камеры"), SerializeField] protected float _cameraMoveTime = 5f;
+
+        protected bool _disableInput = true;
+
+        protected int _chipCount = 12;
+        protected int ChipCount
+        {
+            get { return _chipCount; }
+            set {
+                _chipCount = value; 
+                if (_chipCount <= 0)
+                {
+                    print($"{_oppositePlayer.name} Win!");
+                }
+            }
+        }
 
         protected CellComponent[,] _cells = new CellComponent[8,8];
         public CellComponent[,] Cells { get { return _cells; } }
@@ -49,9 +64,14 @@ namespace Checkers
         protected void OnEnable()
         {
             BaseClickComponent.OnClickEventHandler += OnClick;
+            _disableInput = true;
             if (Vector3.Distance(_camera.transform.position, _cameraPosition3.position) > 1f)
             {
                 StartCoroutine(MoveCamera());
+            }
+            else
+            {
+                _disableInput=false;
             }
         }
 
@@ -62,6 +82,7 @@ namespace Checkers
 
         protected void OnClick(BaseClickComponent component)
         {
+            if (_disableInput) return;
             var type = component.GetType();
             if (type == typeof(ChipComponent) && component.GetColor == _currentPlayer)
             {
@@ -79,15 +100,16 @@ namespace Checkers
                 if (_destinationOne != null && component.name == _destinationOne.name || _destinationTwo != null && component.name == _destinationTwo.name)
                 {
                     _chip.DeselectChip();
-                    SetCellsAndChipsHighlight(BaseClickComponent.HighlightCondition.NotHighlighted, BaseClickComponent.HighlightCondition.CanBeEatenChip, false);
+                    SetCellsAndChipsHighlight(BaseClickComponent.HighlightCondition.NotHighlighted, BaseClickComponent.HighlightCondition.NotHighlighted, false);
+                    _chip.Unpair();
                     StartCoroutine(_chip.MoveChip((CellComponent)component, _chipMoveTime));
                     if (_destinationOne != null && component.name == _destinationOne.name)
                     {
-                        if (_targetOne != null) StartCoroutine(DisableChip(_targetOne.gameObject, 0.5f * _chipMoveTime));
+                        if (_targetOne != null) StartCoroutine(DisableChip(_targetOne, 0.5f * _chipMoveTime));
                     }
                     else if (_destinationTwo != null && component.name == _destinationTwo.name)
                     {
-                        if (_targetTwo != null) StartCoroutine(DisableChip(_targetTwo.gameObject, 0.5f * _chipMoveTime));
+                        if (_targetTwo != null) StartCoroutine(DisableChip(_targetTwo, 0.5f * _chipMoveTime));
                     }
 
                     _chip = null;
@@ -95,29 +117,33 @@ namespace Checkers
                     _destinationTwo = null;
                     _targetOne = null;
                     _targetTwo = null;
-                    StartCoroutine(SwitchTurn(_chipMoveTime));
+                    _disableInput = true;
+                    if (GetIndexes(component).cellIndexZ == 7)
+                    {
+                        ChipCount = 0;
+                    }
+                    else
+                    {
+                        StartCoroutine(SwitchTurn(_chipMoveTime));
+                    }
                 }
             }
         }
 
+        public void DecreaseNumberOfChips()
+        {
+            ChipCount--;
+        }
+
         protected void GetDestinationsAndTargets(ChipComponent chip, BaseClickComponent cell)
         {
-            int cellIndexX = 0, cellIndexZ = 0;
+            int cellIndexX = GetIndexes(cell).cellIndexX; 
+            int cellIndexZ = GetIndexes(cell).cellIndexZ;
+
             CellComponent destinationOne = null, destinationTwo = null;
             ChipComponent targetOne = null, targetTwo = null;
-            for (int x = 0; x < _cells.GetLength(0); x++)
-            {
-                for (int z = 0; z < _cells.GetLength(1); z++)
-                {
-                    if (_cells[x, z].name == cell.name)
-                    {
-                        cellIndexX = x;
-                        cellIndexZ = z;
-                    }
-                }
-            }
 
-            if (cellIndexX > 0 && cellIndexZ >= 0 && cellIndexX - 1 < _cells.GetLength(0) && cellIndexZ + 1 < _cells.GetLength(1))
+            if (cellIndexX > 0 && cellIndexZ > 0 && cellIndexX <= _cells.GetLength(0) - 1 && cellIndexZ + 1 <= _cells.GetLength(1) - 1)
             {
                 destinationOne = GetDestination(cellIndexX - 1, cellIndexZ + 1);
 
@@ -129,7 +155,7 @@ namespace Checkers
                         destinationOne = null;
                         targetOne = null;
                     }
-                    else if (cellIndexX > 0 && cellIndexZ >= 0 && cellIndexX - 2 < _cells.GetLength(0) && cellIndexZ + 2 < _cells.GetLength(1))
+                    else if (cellIndexX >= 2 && cellIndexZ > 0 && cellIndexX - 2 < _cells.GetLength(0) - 1 && cellIndexZ + 2 <= _cells.GetLength(1) - 1)
                     {
                         destinationOne = GetDestination(cellIndexX - 2, cellIndexZ + 2);
                         if (destinationOne.Pair != null)
@@ -139,10 +165,10 @@ namespace Checkers
                     }
                 }
             }
-            if (cellIndexX >= 0 && cellIndexZ >= 0 && cellIndexX + 1 < _cells.GetLength(0) && cellIndexZ + 1 < _cells.GetLength(1))
+            if (cellIndexX >= 0 && cellIndexZ > 0 && cellIndexX + 1 <= _cells.GetLength(0) - 1 && cellIndexZ + 1 <= _cells.GetLength(1) - 1)
             {
                 destinationTwo = GetDestination(cellIndexX + 1, cellIndexZ + 1);
-                print(destinationTwo.name);
+
                 if (destinationTwo.Pair != null)
                 {
                     targetTwo = (ChipComponent)destinationTwo.Pair;
@@ -151,7 +177,7 @@ namespace Checkers
                         destinationTwo = null;
                         targetTwo = null;
                     }
-                    else if (cellIndexX > 0 && cellIndexZ >= 0 && cellIndexX + 2 < _cells.GetLength(0) && cellIndexZ + 2 < _cells.GetLength(1))
+                    else if (cellIndexX >= 0 && cellIndexZ > 0 && cellIndexX + 2 <= _cells.GetLength(0) - 1 && cellIndexZ + 2 <= _cells.GetLength(1) - 1)
                     {
                         destinationTwo = GetDestination(cellIndexX + 2, cellIndexZ + 2);
                         if (destinationTwo.Pair != null)
@@ -167,12 +193,30 @@ namespace Checkers
             _targetTwo = targetTwo;
         }
 
+        protected (int cellIndexX, int cellIndexZ) GetIndexes(BaseClickComponent cell)
+        {
+            int cellIndexX = 0, cellIndexZ = 0;
+
+            for (int x = 0; x < _cells.GetLength(0); x++)
+            {
+                for (int z = 0; z < _cells.GetLength(1); z++)
+                {
+                    if (_cells[x, z].name == cell.name)
+                    {
+                        cellIndexX = x;
+                        cellIndexZ = z;
+                    }
+                }
+            }
+            return (cellIndexX, cellIndexZ);
+        }
+
         protected CellComponent GetDestination(int x, int z)
         {
             return _cells[x, z];
         }
 
-        protected void SetCellsAndChipsHighlight(BaseClickComponent.HighlightCondition cellsHighlight, BaseClickComponent.HighlightCondition chipsHighlight , bool isSelected)
+        protected void SetCellsAndChipsHighlight(BaseClickComponent.HighlightCondition cellsHighlight, BaseClickComponent.HighlightCondition chipsHighlight, bool isSelected)
         {
             if (_destinationOne != null)
             {
@@ -199,10 +243,12 @@ namespace Checkers
             }
         }
 
-        protected IEnumerator DisableChip(GameObject chip, float time)
+        protected IEnumerator DisableChip(ChipComponent chip, float time)
         {
             yield return new WaitForSeconds(time);
-            chip.SetActive(false);
+            chip.Unpair();
+            chip.gameObject.SetActive(false);
+            _oppositePlayer.DecreaseNumberOfChips();
         }
 
         protected IEnumerator SwitchTurn(float time)
@@ -220,6 +266,7 @@ namespace Checkers
                 _cameraPosition1.rotation, _cameraPosition2.transform.rotation, _cameraMoveTime / 2);
             yield return MoveFromTo(_cameraPosition2.position, _cameraPosition3.position,
                 _cameraPosition2.rotation, _cameraPosition3.rotation, _cameraMoveTime / 4);
+            _disableInput = false;
         }
 
 
