@@ -39,9 +39,11 @@ namespace Checkers
             switch (GetColor)
             {
                 case ColorType.White:
+                    AddAdditionalMaterial(Resources.Load<Material>("Materials/WhiteCellMaterial"), 0);
                     AddAdditionalMaterial(Resources.Load<Material>("Materials/WhiteCellMaterialHighlighted"), 1);
                     break;
                 case ColorType.Black:
+                    AddAdditionalMaterial(Resources.Load<Material>("Materials/BlackCellMaterial"), 0);
                     AddAdditionalMaterial(Resources.Load<Material>("Materials/BlackCellMaterialHighlighted"), 1);
                     break;
                 default:

@@ -17,7 +17,7 @@ namespace Checkers
 
         private bool isVictory = false;
 
-        private ColorType currentPlayer = ColorType.White;
+        [SerializeField] private ColorType _currentPlayer = ColorType.White;
 
         private Vector3 _cameraBlackPosition = new Vector3(3, 6, 9);
         private Vector3 _cameraBlackRotation = new Vector3(50, 180, 0);
@@ -49,7 +49,7 @@ namespace Checkers
         private void OnClick(BaseClickComponent component)
         {
             var type = component.GetType();
-            if (type == typeof(ChipComponent))
+            if (type == typeof(ChipComponent) && component.GetColor == _currentPlayer)
             {
                 if (_chip != null)
                 {

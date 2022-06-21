@@ -1,5 +1,6 @@
 ﻿using System.Linq;
-
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -63,9 +64,9 @@ namespace Checkers
         /// </summary>
         public void AddAdditionalMaterial(Material material, int index = 1)
         {
-            if (index < 1 || index > 2)
+            if (index < 0 || index > 2)
             {
-                Debug.LogError("Попытка добавить лишний материал. Индекс может быть равен только 1 или 2");
+                Debug.LogError("Попытка добавить лишний материал. Индекс может быть равен только 0, 1 или 2");
                 return;
             }
             _meshMaterials[index] = material;
@@ -128,7 +129,13 @@ namespace Checkers
             //1 элемент - родной материал меша, он не меняется
             //2 элемент - материал при наведении курсора на клетку/выборе фишки
             //3 элемент - материал клетки, на которую можно передвинуть фишку или фишки которую можно съесть
-            _meshMaterials[0] = _mesh.material;
+            StartCoroutine(SetObjectColorAtStart());
+        }
+
+        private IEnumerator SetObjectColorAtStart()
+        {
+            yield return null;
+            Highlight = HighlightCondition.NotHighlighted;
         }
 
         public enum HighlightCondition
