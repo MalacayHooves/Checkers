@@ -37,6 +37,8 @@ namespace Checkers
             }
 
             AddAdditionalMaterial(Resources.Load<Material>("Materials/CanBeEatenMaterial"), 2);
+
+            Invoke("GetPair", Time.deltaTime);
         }
 
         public void DeselectChip()
@@ -52,13 +54,18 @@ namespace Checkers
             Pair.Pair = this;
         }
 
-        public IEnumerator MoveChip(CellComponent end)
+        private void Unpair()
         {
+            Pair.Pair = null;
+        }
+
+        public IEnumerator MoveChip(CellComponent end, float time)
+        {
+            Unpair();
             Vector3 startPosition = transform.position;
             Vector3 endPosition = end.transform.position;
             Vector3 position;
             float currentTime = 0f;
-            float time = 2f;
             while (currentTime <= 0.5 * time)
             {
                 position.x = Mathf.Lerp(startPosition.x, endPosition.x, 1 - (time - currentTime) / time);
@@ -80,6 +87,7 @@ namespace Checkers
             }
 
             transform.position = end.transform.position;
+            GetPair();
         }
     }
 }

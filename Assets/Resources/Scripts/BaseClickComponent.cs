@@ -55,7 +55,7 @@ namespace Checkers
         /// Возвращает или устанавливает пару игровому объекту
         /// </summary>
         /// <remarks>У клеток пара - фишка, у фишек - клетка</remarks>
-        protected BaseClickComponent _pair;
+        [SerializeField] protected BaseClickComponent _pair;
         public BaseClickComponent Pair { get { return _pair; } set { _pair = value; } }
 
         /// <summary>
@@ -110,25 +110,13 @@ namespace Checkers
         public void OnPointerClick(PointerEventData eventData)
 		{
             OnClickEventHandler?.Invoke(this);
-            if (Highlight == HighlightCondition.Highlighted)
-            {
-                //Highlight = HighlightCondition.CanMoveToCell;
-                _isSelected = true;
-            }
-            else if (!_isSelected)
-            {
-                Highlight = HighlightCondition.NotHighlighted;
-                print("NotHigthlinghted");
-                //isSelected = false;
-            }
-
         }
 
         //Этот метод можно вызвать в дочерних классах (если они есть) и тем самым пробросить вызов
         //события из дочернего класса в родительский
         protected void CallBackEvent(BaseClickComponent target, bool isFocus)
         {
-            OnFocusEventHandler?.Invoke(target, isFocus);
+            //OnFocusEventHandler?.Invoke(target, isFocus);
         }
 
 		protected virtual void Start()
