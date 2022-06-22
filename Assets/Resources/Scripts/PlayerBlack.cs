@@ -8,7 +8,7 @@ namespace Checkers
     {
         protected override void SetPlayerColor()
         {
-            _currentPlayer = ColorType.Black;
+            _currentPlayerColor = ColorType.Black;
         }
 
         protected override void SetCellsArray()

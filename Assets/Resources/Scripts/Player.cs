@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -20,9 +21,7 @@ namespace Checkers
         [SerializeField] protected Transform _cameraPosition2;
         [SerializeField] protected Transform _cameraPosition3;
 
-
-
-        [SerializeField] protected ColorType _currentPlayer;
+        [SerializeField] protected ColorType _currentPlayerColor;
         [Tooltip("Время движения фишки"), SerializeField] protected float _chipMoveTime = 1f;
         [Tooltip("Время движения камеры"), SerializeField] protected float _cameraMoveTime = 5f;
 
@@ -64,6 +63,16 @@ namespace Checkers
         protected void OnEnable()
         {
             BaseClickComponent.OnClickEventHandler += OnClick;
+
+            ChipComponent[] temp = FindObjectsOfType<ChipComponent>();
+            List<ChipComponent> chips = new List<ChipComponent>();
+            foreach (ChipComponent chip in temp)
+            {
+                if (chip.GetColor == _currentPlayerColor) chips.Add(chip);
+            }
+            ChipCount = chips.Count;
+
+            if (ChipCount <= 0) return;
             _disableInput = true;
             if (Vector3.Distance(_camera.transform.position, _cameraPosition3.position) > 1f)
             {
@@ -71,7 +80,7 @@ namespace Checkers
             }
             else
             {
-                _disableInput=false;
+                _disableInput = false;
             }
         }
 
@@ -84,7 +93,7 @@ namespace Checkers
         {
             if (_disableInput) return;
             var type = component.GetType();
-            if (type == typeof(ChipComponent) && component.GetColor == _currentPlayer)
+            if (type == typeof(ChipComponent) && component.GetColor == _currentPlayerColor)
             {
                 if (_chip != null)
                 {
@@ -120,7 +129,7 @@ namespace Checkers
                     _disableInput = true;
                     if (GetIndexes(component).cellIndexZ == 7)
                     {
-                        ChipCount = 0;
+                        _oppositePlayer.ChipCount = 0;
                     }
                     else
                     {
@@ -128,11 +137,6 @@ namespace Checkers
                     }
                 }
             }
-        }
-
-        public void DecreaseNumberOfChips()
-        {
-            ChipCount--;
         }
 
         protected void GetDestinationsAndTargets(ChipComponent chip, BaseClickComponent cell)
@@ -143,10 +147,9 @@ namespace Checkers
             CellComponent destinationOne = null, destinationTwo = null;
             ChipComponent targetOne = null, targetTwo = null;
 
-            if (cellIndexX > 0 && cellIndexZ > 0 && cellIndexX <= _cells.GetLength(0) - 1 && cellIndexZ + 1 <= _cells.GetLength(1) - 1)
+            if (CheckIndexExisting(Cells, cellIndexX - 1, cellIndexZ + 1))
             {
                 destinationOne = GetDestination(cellIndexX - 1, cellIndexZ + 1);
-
                 if (destinationOne.Pair != null)
                 {
                     targetOne = (ChipComponent)destinationOne.Pair;
@@ -155,20 +158,29 @@ namespace Checkers
                         destinationOne = null;
                         targetOne = null;
                     }
-                    else if (cellIndexX >= 2 && cellIndexZ > 0 && cellIndexX - 2 < _cells.GetLength(0) - 1 && cellIndexZ + 2 <= _cells.GetLength(1) - 1)
+                    else
                     {
-                        destinationOne = GetDestination(cellIndexX - 2, cellIndexZ + 2);
-                        if (destinationOne.Pair != null)
+                        if (CheckIndexExisting(Cells, cellIndexX - 2, cellIndexZ + 2))
+                        {
+                            destinationOne = GetDestination(cellIndexX - 2, cellIndexZ + 2);
+                            if (destinationOne.Pair != null)
+                            {
+                                destinationOne = null;
+                                targetOne = null;
+                            }
+                        }
+                        else
                         {
                             destinationOne = null;
+                            targetOne = null;
                         }
                     }
                 }
             }
-            if (cellIndexX >= 0 && cellIndexZ > 0 && cellIndexX + 1 <= _cells.GetLength(0) - 1 && cellIndexZ + 1 <= _cells.GetLength(1) - 1)
+
+            if (CheckIndexExisting(Cells, cellIndexX + 1, cellIndexZ + 1))
             {
                 destinationTwo = GetDestination(cellIndexX + 1, cellIndexZ + 1);
-
                 if (destinationTwo.Pair != null)
                 {
                     targetTwo = (ChipComponent)destinationTwo.Pair;
@@ -177,12 +189,21 @@ namespace Checkers
                         destinationTwo = null;
                         targetTwo = null;
                     }
-                    else if (cellIndexX >= 0 && cellIndexZ > 0 && cellIndexX + 2 <= _cells.GetLength(0) - 1 && cellIndexZ + 2 <= _cells.GetLength(1) - 1)
+                    else
                     {
-                        destinationTwo = GetDestination(cellIndexX + 2, cellIndexZ + 2);
-                        if (destinationTwo.Pair != null)
+                        if (CheckIndexExisting(Cells, cellIndexX + 2, cellIndexZ + 2))
+                        {
+                            destinationTwo = GetDestination(cellIndexX + 2, cellIndexZ + 2);
+                            if (destinationTwo.Pair != null)
+                            {
+                                destinationTwo = null;
+                                targetTwo = null;
+                            }
+                        }
+                        else
                         {
                             destinationTwo = null;
+                            targetTwo = null;
                         }
                     }
                 }
@@ -191,6 +212,13 @@ namespace Checkers
             _destinationTwo = destinationTwo;
             _targetOne = targetOne;
             _targetTwo = targetTwo;
+        }
+
+        protected bool CheckIndexExisting(Array array, int x, int z)
+        {
+            bool isExist = false;
+            if (x >= 0 && z >= 0 && x <= array.GetLength(0) - 1 && z <= array.GetLength(1) - 1) isExist = true;
+            return isExist;
         }
 
         protected (int cellIndexX, int cellIndexZ) GetIndexes(BaseClickComponent cell)
@@ -248,7 +276,6 @@ namespace Checkers
             yield return new WaitForSeconds(time);
             chip.Unpair();
             chip.gameObject.SetActive(false);
-            _oppositePlayer.DecreaseNumberOfChips();
         }
 
         protected IEnumerator SwitchTurn(float time)
@@ -285,7 +312,4 @@ namespace Checkers
             _camera.transform.rotation = endRotation;
         }
     }
-
-
-
 }

@@ -12,7 +12,6 @@ namespace Checkers
         public override void OnPointerEnter(PointerEventData eventData)
         {
             if (_isSelected) return;
-            GetPair();
             Highlight = HighlightCondition.Highlighted;
             if (Pair != null && !Pair.IsSelected) Pair.Highlight = HighlightCondition.Highlighted;
         }
@@ -67,7 +66,6 @@ namespace Checkers
 
         public IEnumerator MoveChip(CellComponent end, float time)
         {
-            Unpair();
             Vector3 startPosition = transform.position;
             Vector3 endPosition = end.transform.position;
             Vector3 position;

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3055183094374639590}
   - component: {fileID: 6435513088224211251}
   - component: {fileID: 684621062092558459}
-  - component: {fileID: 9133061043908271872}
+  - component: {fileID: 6254634133444846405}
   m_Layer: 0
   m_Name: WhiteBoardPiece
   m_TagString: Untagged
@@ -254,7 +254,7 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!114 &9133061043908271872
+--- !u!114 &6254634133444846405
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -266,6 +266,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: add5a3772e30d8a40b9cc1bccbb015f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _pointerOnMaterial: {fileID: 2100000, guid: d0bea33ddae405e4ea87e8922f5255be, type: 2}
-  _defaultMaterial: {fileID: 2100000, guid: 8f52907ffe7c9714b92db2cb878ba8f5, type: 2}
+  _meshMaterials:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   _color: 0
+  _pair: {fileID: 0}
