@@ -25,13 +25,13 @@ namespace Checkers
 
         private void OnEnable()
         {
-            Player.OnTurnEnd += WriteInfo;
+            Player.OnObserverWrite += WriteInfo;
             File.WriteAllText(path, string.Empty);
         }
 
         private void OnDisable()
         {
-            Player.OnTurnEnd -= WriteInfo;
+            Player.OnObserverWrite -= WriteInfo;
         }
 
         public void OnCompleted()

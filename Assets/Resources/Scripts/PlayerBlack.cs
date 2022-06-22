@@ -9,6 +9,7 @@ namespace Checkers
         protected override void SetPlayerColor()
         {
             _currentPlayerColor = ColorType.Black;
+            _oppositePlayerColor = ColorType.White;
         }
 
         protected override void SetCellsArray()
