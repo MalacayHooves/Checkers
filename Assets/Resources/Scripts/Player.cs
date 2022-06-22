@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -26,6 +27,10 @@ namespace Checkers
         [SerializeField] protected ColorType _currentPlayerColor;
         [Tooltip("Время движения фишки"), SerializeField] protected float _chipMoveTime = 1f;
         [Tooltip("Время движения камеры"), SerializeField] protected float _cameraMoveTime = 5f;
+
+
+        public delegate Task TurnEndHandler(ColorType color, ChipCondition chipCondition, string cellInfo);
+        public static event TurnEndHandler OnTurnEnd;
 
         protected bool _disableInput = true;
 
@@ -104,6 +109,7 @@ namespace Checkers
                     _chip.Condition = ChipCondition.Selected;
                 }
                 _chip = (ChipComponent)component;
+                OnTurnEnd?.Invoke(_chip.GetColor, ChipCondition.Selected, _chip.CellNameInfo);
                 GetDestinationsAndTargets(_chip, _chip.Pair);
                 SetCellsAndChipsHighlight(BaseClickComponent.HighlightCondition.CanMoveToCell, BaseClickComponent.HighlightCondition.CanBeEatenChip, true);
             }
