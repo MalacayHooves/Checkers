@@ -5,9 +5,22 @@ using UnityEngine.EventSystems;
 
 namespace Checkers
 {
-    public class ChipComponent : BaseClickComponent
+    public class ChipComponent : BaseClickComponent, IWritingInfo
     {
         protected Player _player;
+        private ChipCondition _condition;
+        public ChipCondition Condition { get => _condition; set => _condition = value; }
+        public string ChipNameInfo { get => this.name;}
+        public string CellNameInfo 
+        {
+            get
+            {
+                if (Pair != null)
+                    return Pair.name;
+                else
+                    return null;
+            }
+        }
 
         public override void OnPointerEnter(PointerEventData eventData)
         {

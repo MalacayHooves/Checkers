@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -51,7 +53,7 @@ namespace Checkers
             SetOppositePlayer();
             _cameraPosition1 = transform.Find("CameraPosition1");
             _cameraPosition2 = transform.Find("CameraPosition2");
-            _cameraPosition3 = transform.Find("CameraPosition3");
+            _cameraPosition3 = transform.Find("CameraPosition3");           
         }
 
         protected abstract void SetPlayerColor();
@@ -99,6 +101,7 @@ namespace Checkers
                 {
                     _chip.DeselectChip();
                     SetCellsAndChipsHighlight(BaseClickComponent.HighlightCondition.NotHighlighted, BaseClickComponent.HighlightCondition.NotHighlighted, false);
+                    _chip.Condition = ChipCondition.Selected;
                 }
                 _chip = (ChipComponent)component;
                 GetDestinationsAndTargets(_chip, _chip.Pair);
@@ -311,5 +314,7 @@ namespace Checkers
             _camera.transform.position = endPosition;
             _camera.transform.rotation = endRotation;
         }
+
+
     }
 }
