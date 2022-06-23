@@ -15,18 +15,21 @@ namespace Checkers
     }
     public class Observer : MonoBehaviour, IObserver<Player>
     {
-        [SerializeField] private bool _isPlaying;
+        [Tooltip("check if you are not going to play but watch"), SerializeField] private bool _isPlaying;
         //[SerializeField] private bool _isWriting;
 
-     
 
-        private IDisposable _unsubscriber;
+
         private static string path = Environment.CurrentDirectory + @"\Assets\Resources\Scripts\CheckersHistory.txt";
+        private IDisposable _unsubscriber;
 
         private void OnEnable()
         {
             Player.OnObserverWrite += WriteInfo;
-            File.WriteAllText(path, string.Empty);
+            if (!_isPlaying)
+                File.WriteAllText(path, string.Empty);
+            else
+                PlayInfo();
         }
 
         private void OnDisable()
@@ -66,13 +69,13 @@ namespace Checkers
             
         }
 
-        static async Task WriteInfo(ColorType color, ChipCondition chipcondition, string cellInfo)
+        static async Task WriteInfo(ColorType color, string chipInfo, ChipCondition chipcondition, string cellInfo)
         {
                 using (StreamWriter stream = new StreamWriter(path, true))
                 {
                     await Task.Run(() =>
                     {
-                        stream.WriteLine("{0} chip was {1} at {2}", color, chipcondition, cellInfo);
+                        stream.WriteLine("{0} chip {1} was {2} at {3}", color, chipInfo, chipcondition, cellInfo);
                       
                     });
                     //await stream.WriteAllLinesAsync(write);
@@ -80,6 +83,11 @@ namespace Checkers
                     //stream.WriteLine();
                     //stream.WriteLine("Started");
                 }
+        }
+
+        private void PlayInfo()
+        {
+
         }
 
 

@@ -30,7 +30,7 @@ namespace Checkers
         [Tooltip("Время движения камеры"), SerializeField] protected float _cameraMoveTime = 5f;
 
 
-        public delegate Task ObserverWriteHandler(ColorType color, ChipCondition chipCondition, string cellInfo);
+        public delegate Task ObserverWriteHandler(ColorType color, string chipInfo, ChipCondition chipCondition, string cellInfo);
         public static event ObserverWriteHandler OnObserverWrite;
 
         protected bool _disableInput = true;
@@ -67,13 +67,15 @@ namespace Checkers
         protected abstract void SetCellsArray();
 
         protected abstract void SetOppositePlayer();
-        
+
+
+        private List<ChipComponent> chips = new List<ChipComponent>();
+
         protected void OnEnable()
         {
             BaseClickComponent.OnClickEventHandler += OnClick;
 
             ChipComponent[] temp = FindObjectsOfType<ChipComponent>();
-            List<ChipComponent> chips = new List<ChipComponent>();
             foreach (ChipComponent chip in temp)
             {
                 if (chip.GetColor == _currentPlayerColor) chips.Add(chip);
@@ -110,7 +112,7 @@ namespace Checkers
                     _chip.Condition = ChipCondition.Selected;
                 }
                 _chip = (ChipComponent)component;
-                OnObserverWrite?.Invoke(_chip.GetColor, ChipCondition.Selected, _chip.CellNameInfo);
+                OnObserverWrite?.Invoke(_chip.GetColor, _chip.name, ChipCondition.Selected, _chip.CellNameInfo);
                 GetDestinationsAndTargets(_chip, _chip.Pair);
                 SetCellsAndChipsHighlight(BaseClickComponent.HighlightCondition.CanMoveToCell, BaseClickComponent.HighlightCondition.CanBeEatenChip, true);
             }
@@ -129,7 +131,7 @@ namespace Checkers
                     SetCellsAndChipsHighlight(BaseClickComponent.HighlightCondition.NotHighlighted, BaseClickComponent.HighlightCondition.NotHighlighted, false);
                     _chip.Unpair();
                     StartCoroutine(_chip.MoveChip((CellComponent)component, _chipMoveTime));
-                    OnObserverWrite?.Invoke(_chip.GetColor, ChipCondition.Moved, component.name);
+                    OnObserverWrite?.Invoke(_chip.GetColor, _chip.name, ChipCondition.Moved, component.name);
                     if (_destinationOne != null && component.name == _destinationOne.name)
                     {
                         if (_targetOne != null)
@@ -162,7 +164,7 @@ namespace Checkers
                         }
                     }
                     if (destroyed)
-                    OnObserverWrite?.Invoke(_oppositePlayerColor, ChipCondition.Destroyed, cellName);
+                    //OnObserverWrite?.Invoke(_oppositePlayerColor, ChipCondition.Destroyed, cellName);
 
                     _chip = null;
                     _destinationOne = null;
@@ -317,6 +319,8 @@ namespace Checkers
         protected IEnumerator DisableChip(ChipComponent chip, float time)
         {
             yield return new WaitForSeconds(time);
+            OnObserverWrite?.Invoke(chip.GetColor, chip.name, ChipCondition.Destroyed, chip.Pair.name);
+
             chip.Unpair();
             chip.gameObject.SetActive(false);
         }
