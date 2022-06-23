@@ -23,6 +23,9 @@ namespace Checkers
         private static string path = Environment.CurrentDirectory + @"\Assets\Resources\Scripts\CheckersHistory.txt";
         private IDisposable _unsubscriber;
 
+        public delegate void ObserverReadHandler(string playerColor, string componentName, bool isDestroyed, string whereToMove);
+        public static event ObserverReadHandler OnObserverRead;
+
         private void OnEnable()
         {
             Player.OnObserverWrite += WriteInfo;
@@ -85,9 +88,27 @@ namespace Checkers
                 }
         }
 
-        private void PlayInfo()
+        private async void PlayInfo()
         {
+            using (StreamReader reader = new StreamReader(path))
+            {
+                string line;
+                while ((line = await reader.ReadLineAsync()) != null)
+                {
+                    string[] words = line.Split(' ');
+                    bool destroy = (words[4] == "Destroyed");
+                    string whereToMove = words[4] == "Moved" ? words[6] : null;
+                    /*
+                    Debug.Log(words[0]);
+                    Debug.Log(words[2]);
+                    Debug.Log(destroy);
+                    Debug.Log(whereToMove);*/
 
+                    OnObserverRead?.Invoke(words[0], words[2], destroy, whereToMove);
+
+                    
+                }
+            }
         }
 
 

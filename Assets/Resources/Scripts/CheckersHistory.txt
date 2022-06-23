@@ -1,6 +1,12 @@
-White chip Chip9 was Selected at A3
-White chip Chip9 was Moved at B4
+White chip Chip10 was Selected at C3
+White chip Chip10 was Moved at D4
 Black chip Chip10 was Selected at F6
 Black chip Chip10 was Moved at E5
-White chip Chip12 was Selected at G3
-White chip Chip12 was Moved at H4
+White chip Chip10 was Selected at D4
+White chip Chip10 was Moved at F6
+Black chip Chip10 was Destroyed at E5
+Black chip Chip5 was Selected at G7
+Black chip Chip5 was Moved at E5
+White chip Chip10 was Destroyed at F6
+White chip Chip5 was Selected at B2
+White chip Chip5 was Moved at C3
