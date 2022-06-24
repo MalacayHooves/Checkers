@@ -112,6 +112,7 @@ namespace Checkers
 
         protected void OnClick(BaseClickComponent component)
         {
+            print(_currentPlayerColor);
             if (_disableInput) return;
             var type = component.GetType();
             if (type == typeof(ChipComponent) && component.GetColor == _currentPlayerColor)
@@ -124,7 +125,12 @@ namespace Checkers
                 }
                 _chip = (ChipComponent)component;
                 OnObserverWrite?.Invoke(_chip.GetColor, _chip.name, ChipCondition.Selected, _chip.CellNameInfo);
+                
+
                 GetDestinationsAndTargets(_chip, _chip.Pair);
+
+
+
                 SetCellsAndChipsHighlight(BaseClickComponent.HighlightCondition.CanMoveToCell, BaseClickComponent.HighlightCondition.CanBeEatenChip, true);
             }
             else if (type == typeof(CellComponent))
@@ -363,31 +369,47 @@ namespace Checkers
         }
 
 
-
-        private void DecryptionMethod(string playerColor, string componentName, bool isDestroyed, string whereToMove)
+        private void SwitchPlayer()
         {
-            BaseClickComponent component;
+            var playercolor = _currentPlayerColor;
+            _currentPlayerColor = _oppositePlayerColor;
+            _oppositePlayerColor = playercolor;
+
+        }
+
+        private async void DecryptionMethod(string playerColor, string componentName, bool isDestroyed, string whereToMove)
+        {
+            _disableInput = false;
+            ChipComponent chipComponent;
             IEnumerable<ChipComponent> chipComponents;
             //IEnumerable<CellComponent> cellComponents;
             
             if (isDestroyed == true)
             {
-                component = oppositeChips.Where(chip => chip.name == componentName).ElementAt(0);
-                DisableChip((ChipComponent)component, 0.5f * _chipMoveTime);
+                chipComponent = oppositeChips.Where(chip => chip.name == componentName).ElementAt(0);
+                chipComponent.GetPair();
+                DisableChip((ChipComponent)chipComponent, 0.5f * _chipMoveTime);
                 return;
             }
 
             //component = FindObjectsOfType<ChipComponent>().Where(chip => chip.name == componentName).ElementAt(0);
-            component = GetComponents<ChipComponent>().FirstOrDefault(chip => chip.name == componentName);
+            GameObject object1 = FindObjectsOfType<ChipComponent>().Where(chip => chip.name == componentName).ElementAt(0).gameObject;
+            //print(object1.name);
+            chipComponent = object1.GetComponent<ChipComponent>();
+            chipComponent.GetPair();
+            //component = GetComponents<ChipComponent>().FirstOrDefault(chip => chip.name == componentName);
             //chipComponents = chips.Where(chip => chip.name == componentName);
             //component = chipComponents.ElementAt(0);
-            OnClick(component);
+
+            OnClick(chipComponent);
+            Thread.Sleep(10000);
+            //await WaitForSeconds(_chipMoveTime);
 
             if(whereToMove != null)
             {
-                component = FindObjectsOfType<CellComponent>().Where(cell => cell.name == whereToMove).ElementAt(0);
-                print(component.name);
-                OnClick(component);
+                CellComponent cellComponent = FindObjectsOfType<CellComponent>().Where(cell => cell.name == whereToMove).ElementAt(0);
+                //print(cellComponent.name);
+                OnClick(cellComponent);
             }
             /*
             if (whereToMove != null)
@@ -404,6 +426,8 @@ namespace Checkers
             }
             */
             //PlayerBlack.FindObjectOfType<ChipComponent>()
+            //SwitchPlayer();
+            //await Task.Run(OnClick());
         }
     }
 }
