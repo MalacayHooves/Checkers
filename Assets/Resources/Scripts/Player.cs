@@ -34,6 +34,9 @@ namespace Checkers
         public delegate Task ObserverWriteHandler(ColorType color, string chipInfo, ChipCondition chipCondition, string cellInfo);
         public static event ObserverWriteHandler OnObserverWrite;
 
+        public delegate void StringIsReadyHandler(bool isReady);
+        public static event StringIsReadyHandler OnStringIsReady;
+
         protected bool _disableInput = true;
 
         protected int _chipCount = 12;
@@ -189,6 +192,8 @@ namespace Checkers
                     {
                         StartCoroutine(SwitchTurn(_chipMoveTime));
                     }
+
+                    
                 }
             }
         }
@@ -337,6 +342,7 @@ namespace Checkers
         protected IEnumerator SwitchTurn(float time)
         {
             yield return new WaitForSeconds(time);
+            //print("SwitchTurn");
             _oppositePlayer.enabled = true;
             this.enabled = false;
         }
@@ -350,6 +356,8 @@ namespace Checkers
             yield return MoveFromTo(_cameraPosition2.position, _cameraPosition3.position,
                 _cameraPosition2.rotation, _cameraPosition3.rotation, _cameraMoveTime / 4);
             _disableInput = false;
+
+            OnStringIsReady?.Invoke(true);
         }
 
 
@@ -377,8 +385,10 @@ namespace Checkers
 
         }
 
-        private async void DecryptionMethod(string playerColor, string componentName, bool isDestroyed, string whereToMove)
+        private void DecryptionMethod(string playerColor, string componentName, bool isDestroyed, string whereToMove)
         {
+            //OnStringIsReady?.Invoke(false);
+
             _disableInput = false;
             ChipComponent chipComponent;
             IEnumerable<ChipComponent> chipComponents;
@@ -389,28 +399,29 @@ namespace Checkers
                 chipComponent = oppositeChips.Where(chip => chip.name == componentName).ElementAt(0);
                 chipComponent.GetPair();
                 DisableChip((ChipComponent)chipComponent, 0.5f * _chipMoveTime);
+                OnStringIsReady?.Invoke(true);
                 return;
             }
 
-            //component = FindObjectsOfType<ChipComponent>().Where(chip => chip.name == componentName).ElementAt(0);
-            GameObject object1 = FindObjectsOfType<ChipComponent>().Where(chip => chip.name == componentName).ElementAt(0).gameObject;
-            //print(object1.name);
+            GameObject object1 = FindObjectsOfType<ChipComponent>().Where(chip => (chip.name == componentName) && ((chip.GetComponent<ChipComponent>().GetColor).ToString() == playerColor)).ElementAt(0).gameObject;
+            print(object1.name);
             chipComponent = object1.GetComponent<ChipComponent>();
             chipComponent.GetPair();
-            //component = GetComponents<ChipComponent>().FirstOrDefault(chip => chip.name == componentName);
-            //chipComponents = chips.Where(chip => chip.name == componentName);
-            //component = chipComponents.ElementAt(0);
 
             OnClick(chipComponent);
-            Thread.Sleep(10000);
-            //await WaitForSeconds(_chipMoveTime);
 
-            if(whereToMove != null)
+
+            if (whereToMove != null)
             {
                 CellComponent cellComponent = FindObjectsOfType<CellComponent>().Where(cell => cell.name == whereToMove).ElementAt(0);
                 //print(cellComponent.name);
                 OnClick(cellComponent);
             }
+
+            else
+                OnStringIsReady?.Invoke(true);
+
+            //OnStringIsReady?.Invoke(true);
             /*
             if (whereToMove != null)
             {

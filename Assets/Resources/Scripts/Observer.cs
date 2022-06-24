@@ -26,9 +26,13 @@ namespace Checkers
         public delegate void ObserverReadHandler(string playerColor, string componentName, bool isDestroyed, string whereToMove);
         public static event ObserverReadHandler OnObserverRead;
 
+        private bool _stringIsready = true;
+
         private void OnEnable()
         {
             Player.OnObserverWrite += WriteInfo;
+            Player.OnStringIsReady += StringIsReady;
+
             if (!_isPlaying)
                 File.WriteAllText(path, string.Empty);
             else
@@ -38,6 +42,7 @@ namespace Checkers
         private void OnDisable()
         {
             Player.OnObserverWrite -= WriteInfo;
+            Player.OnStringIsReady -= StringIsReady;
         }
 
         public void OnCompleted()
@@ -88,6 +93,20 @@ namespace Checkers
                 }
         }
 
+
+        private void StringIsReady(bool stringIsReady)
+        {
+            _stringIsready = stringIsReady;
+        }
+
+        private void NextStringIsReady()
+        {
+            //bool isReady = false;
+
+
+            return;
+        }
+
         private async void PlayInfo()
         {
             using (StreamReader reader = new StreamReader(path))
@@ -105,8 +124,16 @@ namespace Checkers
                     Debug.Log(whereToMove);*/
 
                     OnObserverRead?.Invoke(words[0], words[2], destroy, whereToMove);
+                    //await Task.Run(() => NextStringIsReady());
+                    //await Task.Run()
+                    //System.Threading.Thread.Sleep(10000);
 
-                    
+                    while(!_stringIsready)
+                    {
+                        await Task.Run(() => NextStringIsReady());
+                    }
+                    _stringIsready = false;
+
                 }
             }
         }
