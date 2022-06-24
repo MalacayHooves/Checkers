@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Checkers
 {
@@ -14,12 +15,40 @@ namespace Checkers
     }
     public class Observer : MonoBehaviour, IObserver<Player>
     {
-        [SerializeField] private bool _isReading;
-        [SerializeField] private bool _isWriting;
+        [Tooltip("check if you are not going to play but watch"), SerializeField] private bool _isPlaying;
+        //[SerializeField] private bool _isWriting;
+
+
+
+        private static string path = Environment.CurrentDirectory + @"\Assets\Resources\Scripts\CheckersHistory.txt";
+        private IDisposable _unsubscriber;
+
+        public delegate void ObserverReadHandler(string playerColor, string componentName, bool isDestroyed, string whereToMove);
+        public static event ObserverReadHandler OnObserverRead;
+
+        private bool _stringIsready = true;
+
+        private void OnEnable()
+        {
+            Player.OnObserverWrite += WriteInfo;
+            Player.OnStringIsReady += StringIsReady;
+
+            if (!_isPlaying)
+                File.WriteAllText(path, string.Empty);
+            else
+                PlayInfo();
+        }
+
+        private void OnDisable()
+        {
+            Player.OnObserverWrite -= WriteInfo;
+            Player.OnStringIsReady -= StringIsReady;
+        }
 
         public void OnCompleted()
         {
-            throw new NotImplementedException();
+            print("The Observer has completed writing info.");
+            this.Unsubscribe();
         }
 
         public void OnError(Exception error)
@@ -32,21 +61,81 @@ namespace Checkers
             throw new NotImplementedException();
         }
 
-        private void Awake()
+        public virtual void Subscribe(IObservable<Player> player)
         {
-            if (_isReading & _isWriting) Debug.LogError("Please, choose reading or writing only!");
+            if (player != null)
+                _unsubscriber = player.Subscribe(this);
         }
 
-        private void WriteInfo()
+        public virtual void Unsubscribe()
         {
-            using (var file = File.OpenWrite(Environment.CurrentDirectory + @"\Assets\Resources\Scripts\CheckersHistory.txt"))
-            {
-                using (var stream = new StreamWriter(file))
+            _unsubscriber.Dispose();
+        }
+
+        private void Awake()
+        {
+            
+        }
+
+        static async Task WriteInfo(ColorType color, string chipInfo, ChipCondition chipcondition, string cellInfo)
+        {
+                using (StreamWriter stream = new StreamWriter(path, true))
                 {
-                    stream.WriteLine("Started");
+                    await Task.Run(() =>
+                    {
+                        stream.WriteLine("{0} chip {1} was {2} at {3}", color, chipInfo, chipcondition, cellInfo);
+                      
+                    });
+                    //await stream.WriteAllLinesAsync(write);
+                    //stream.Write("{0} chip was {1} at {2}", color, chipcondition, cellInfo);
+                    //stream.WriteLine();
+                    //stream.WriteLine("Started");
+                }
+        }
+
+
+        private void StringIsReady(bool stringIsReady)
+        {
+            _stringIsready = stringIsReady;
+        }
+
+        private void NextStringIsReady()
+        {
+            //bool isReady = false;
+
+
+            return;
+        }
+
+        private async void PlayInfo()
+        {
+            using (StreamReader reader = new StreamReader(path))
+            {
+                string line;
+                while ((line = await reader.ReadLineAsync()) != null)
+                {
+                    string[] words = line.Split(' ');
+                    bool destroy = (words[4] == "Destroyed");
+                    string whereToMove = words[4] == "Moved" ? words[6] : null;
+                    /*
+                    Debug.Log(words[0]);
+                    Debug.Log(words[2]);
+                    Debug.Log(destroy);
+                    Debug.Log(whereToMove);*/
+
+                    OnObserverRead?.Invoke(words[0], words[2], destroy, whereToMove);
+                    //await Task.Run(() => NextStringIsReady());
+                    //await Task.Run()
+                    //System.Threading.Thread.Sleep(10000);
+
+                    while(!_stringIsready)
+                    {
+                        await Task.Run(() => NextStringIsReady());
+                    }
+                    _stringIsready = false;
+
                 }
             }
-
         }
 
 

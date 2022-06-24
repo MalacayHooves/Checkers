@@ -66,7 +66,7 @@ namespace Checkers
             if (Pair != null) Pair.Highlight = HighlightCondition.NotHighlighted;
         }
 
-        private void GetPair()
+        public void GetPair()
         {
             Pair = _player.Cells[Mathf.RoundToInt(gameObject.transform.localPosition.x), Mathf.RoundToInt(gameObject.transform.localPosition.z)].GetComponent<BaseClickComponent>();
             Pair.Pair = this;

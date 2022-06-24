@@ -1,1 +1,10 @@
-Started
+White chip Chip9 was Selected at A3
+White chip Chip9 was Moved at B4
+Black chip Chip11 was Selected at D6
+Black chip Chip11 was Moved at C5
+White chip Chip9 was Selected at B4
+White chip Chip9 was Moved at D6
+Black chip Chip11 was Destroyed at C5
+Black chip Chip6 was Selected at E7
+Black chip Chip6 was Moved at C5
+White chip Chip9 was Destroyed at D6

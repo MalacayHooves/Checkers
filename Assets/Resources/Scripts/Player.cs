@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
+using System.Linq;
 using UnityEngine.EventSystems;
 
 namespace Checkers
@@ -24,8 +26,16 @@ namespace Checkers
         [SerializeField] protected Transform _cameraPosition3;
 
         [SerializeField] protected ColorType _currentPlayerColor;
+        protected ColorType _oppositePlayerColor;
         [Tooltip("Время движения фишки"), SerializeField] protected float _chipMoveTime = 1f;
         [Tooltip("Время движения камеры"), SerializeField] protected float _cameraMoveTime = 5f;
+
+
+        public delegate Task ObserverWriteHandler(ColorType color, string chipInfo, ChipCondition chipCondition, string cellInfo);
+        public static event ObserverWriteHandler OnObserverWrite;
+
+        public delegate void StringIsReadyHandler(bool isReady);
+        public static event StringIsReadyHandler OnStringIsReady;
 
         protected bool _disableInput = true;
 
@@ -61,16 +71,22 @@ namespace Checkers
         protected abstract void SetCellsArray();
 
         protected abstract void SetOppositePlayer();
-        
+
+
+        private List<ChipComponent> chips = new List<ChipComponent>();
+        private List<ChipComponent> oppositeChips = new List<ChipComponent>();
+        private List<CellComponent> _cellsList = new List<CellComponent>();
+
         protected void OnEnable()
         {
             BaseClickComponent.OnClickEventHandler += OnClick;
+            Observer.OnObserverRead += DecryptionMethod;
 
             ChipComponent[] temp = FindObjectsOfType<ChipComponent>();
-            List<ChipComponent> chips = new List<ChipComponent>();
             foreach (ChipComponent chip in temp)
             {
                 if (chip.GetColor == _currentPlayerColor) chips.Add(chip);
+                else oppositeChips.Add(chip);
             }
             ChipCount = chips.Count;
 
@@ -84,15 +100,22 @@ namespace Checkers
             {
                 _disableInput = false;
             }
+
+            /*
+            CellComponent[] tempCells = FindObjectsOfType<CellComponent>();
+            foreach (CellComponent cell in tempCells)
+                _cellsList.Add(cell);*/
         }
 
         protected void OnDisable()
         {
             BaseClickComponent.OnClickEventHandler -= OnClick;
+            Observer.OnObserverRead -= DecryptionMethod;
         }
 
         protected void OnClick(BaseClickComponent component)
         {
+            print(_currentPlayerColor);
             if (_disableInput) return;
             var type = component.GetType();
             if (type == typeof(ChipComponent) && component.GetColor == _currentPlayerColor)
@@ -104,25 +127,56 @@ namespace Checkers
                     _chip.Condition = ChipCondition.Selected;
                 }
                 _chip = (ChipComponent)component;
+                OnObserverWrite?.Invoke(_chip.GetColor, _chip.name, ChipCondition.Selected, _chip.CellNameInfo);
+                
+
                 GetDestinationsAndTargets(_chip, _chip.Pair);
+
+
+
                 SetCellsAndChipsHighlight(BaseClickComponent.HighlightCondition.CanMoveToCell, BaseClickComponent.HighlightCondition.CanBeEatenChip, true);
             }
             else if (type == typeof(CellComponent))
             {
                 if (_destinationOne != null && component.name == _destinationOne.name || _destinationTwo != null && component.name == _destinationTwo.name)
                 {
+                    //object[] arguments = new object[3];
+                    //arguments[0] = false;
+
+                    //bool destroyed = false;
+                    //string cellName = null;
+                    //ColorType color;
+
                     _chip.DeselectChip();
                     SetCellsAndChipsHighlight(BaseClickComponent.HighlightCondition.NotHighlighted, BaseClickComponent.HighlightCondition.NotHighlighted, false);
                     _chip.Unpair();
                     StartCoroutine(_chip.MoveChip((CellComponent)component, _chipMoveTime));
+                    OnObserverWrite?.Invoke(_chip.GetColor, _chip.name, ChipCondition.Moved, component.name);
                     if (_destinationOne != null && component.name == _destinationOne.name)
                     {
-                        if (_targetOne != null) StartCoroutine(DisableChip(_targetOne, 0.5f * _chipMoveTime));
+                        if (_targetOne != null)
+                        {
+                            //arguments[2] = _targetOne.GetColor;
+                            //arguments[1] = _targetOne.Pair.name;
+                            //arguments[0] = true;
+                            //destroyed = true;
+                            //cellName = _targetOne.Pair.name;
+                            //OnObserverWrite?.BeginInvoke(_targetOne.GetColor, ChipCondition.Destroyed, _targetOne.Pair.name, OnObserverWrite, component);
+                            //print("Destroyed");
+                            StartCoroutine(DisableChip(_targetOne, 0.5f * _chipMoveTime));
+                        }
                     }
                     else if (_destinationTwo != null && component.name == _destinationTwo.name)
                     {
-                        if (_targetTwo != null) StartCoroutine(DisableChip(_targetTwo, 0.5f * _chipMoveTime));
+                        if (_targetTwo != null)
+                        {
+                            //destroyed = true;
+                            //cellName = _targetTwo.Pair.name;
+                            StartCoroutine(DisableChip(_targetTwo, 0.5f * _chipMoveTime));
+                        }
                     }
+                    //if (destroyed)
+                    //OnObserverWrite?.Invoke(_oppositePlayerColor, ChipCondition.Destroyed, cellName);
 
                     _chip = null;
                     _destinationOne = null;
@@ -138,6 +192,8 @@ namespace Checkers
                     {
                         StartCoroutine(SwitchTurn(_chipMoveTime));
                     }
+
+                    
                 }
             }
         }
@@ -277,6 +333,8 @@ namespace Checkers
         protected IEnumerator DisableChip(ChipComponent chip, float time)
         {
             yield return new WaitForSeconds(time);
+            OnObserverWrite?.Invoke(chip.GetColor, chip.name, ChipCondition.Destroyed, chip.Pair.name);
+
             chip.Unpair();
             chip.gameObject.SetActive(false);
         }
@@ -284,6 +342,7 @@ namespace Checkers
         protected IEnumerator SwitchTurn(float time)
         {
             yield return new WaitForSeconds(time);
+            //print("SwitchTurn");
             _oppositePlayer.enabled = true;
             this.enabled = false;
         }
@@ -297,6 +356,8 @@ namespace Checkers
             yield return MoveFromTo(_cameraPosition2.position, _cameraPosition3.position,
                 _cameraPosition2.rotation, _cameraPosition3.rotation, _cameraMoveTime / 4);
             _disableInput = false;
+
+            OnStringIsReady?.Invoke(true);
         }
 
 
@@ -316,5 +377,68 @@ namespace Checkers
         }
 
 
+        private void SwitchPlayer()
+        {
+            var playercolor = _currentPlayerColor;
+            _currentPlayerColor = _oppositePlayerColor;
+            _oppositePlayerColor = playercolor;
+
+        }
+
+        private void DecryptionMethod(string playerColor, string componentName, bool isDestroyed, string whereToMove)
+        {
+            //OnStringIsReady?.Invoke(false);
+
+            _disableInput = false;
+            ChipComponent chipComponent;
+            IEnumerable<ChipComponent> chipComponents;
+            //IEnumerable<CellComponent> cellComponents;
+            
+            if (isDestroyed == true)
+            {
+                chipComponent = oppositeChips.Where(chip => chip.name == componentName).ElementAt(0);
+                chipComponent.GetPair();
+                DisableChip((ChipComponent)chipComponent, 0.5f * _chipMoveTime);
+                OnStringIsReady?.Invoke(true);
+                return;
+            }
+
+            GameObject object1 = FindObjectsOfType<ChipComponent>().Where(chip => (chip.name == componentName) && ((chip.GetComponent<ChipComponent>().GetColor).ToString() == playerColor)).ElementAt(0).gameObject;
+            print(object1.name);
+            chipComponent = object1.GetComponent<ChipComponent>();
+            chipComponent.GetPair();
+
+            OnClick(chipComponent);
+
+
+            if (whereToMove != null)
+            {
+                CellComponent cellComponent = FindObjectsOfType<CellComponent>().Where(cell => cell.name == whereToMove).ElementAt(0);
+                //print(cellComponent.name);
+                OnClick(cellComponent);
+            }
+
+            else
+                OnStringIsReady?.Invoke(true);
+
+            //OnStringIsReady?.Invoke(true);
+            /*
+            if (whereToMove != null)
+            {
+                component = _cellsList.Where(cell => cell.name == whereToMove).ElementAt(0);
+                OnClick(component);
+            }   
+            
+            if (whereToMove == null)
+            {
+                component = (ChipComponent)(chips.Where(chip => chip.name == componentName));
+                OnClick(component);
+                return;
+            }
+            */
+            //PlayerBlack.FindObjectOfType<ChipComponent>()
+            //SwitchPlayer();
+            //await Task.Run(OnClick());
+        }
     }
 }
